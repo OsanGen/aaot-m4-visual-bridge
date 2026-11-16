@@ -579,17 +579,46 @@
     },
   };
 
+  const requestCheckIcons = {
+    eligibility: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48" aria-hidden="true" focusable="false">
+      <g fill="none" stroke="#27313c" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="5.5" y="9.5" width="37" height="29" rx="4.5" fill="#fff3f8"/>
+        <rect x="10.5" y="14.5" width="15" height="19" rx="3" fill="#f1d2e0"/>
+        <circle cx="18" cy="20.3" r="2.7" fill="#fff3f8"/>
+        <path d="M13.8 29.6a4.2 4.2 0 0 1 8.4 0M30 18.5h7m-7 5.5h7m-7 5.5h5"/>
+      </g>
+    </svg>`,
+    approval: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48" aria-hidden="true" focusable="false">
+      <g fill="none" stroke="#27313c" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M11 7.5h26a4.5 4.5 0 0 1 4.5 4.5v19a4.5 4.5 0 0 1-4.5 4.5H22l-9 6v-6h-2A4.5 4.5 0 0 1 6.5 31V12A4.5 4.5 0 0 1 11 7.5z" fill="#fff3f8"/>
+        <circle cx="24" cy="21" r="10" fill="#f1d2e0" stroke="none"/>
+        <path d="M20 17.7c0-2.1 1.7-3.7 4-3.7s4 1.4 4 3.6c0 1.8-1.1 2.7-2.4 3.7-1.1.9-1.6 1.7-1.6 3"/>
+        <circle cx="24" cy="27.6" r="1.2" fill="#27313c" stroke="none"/>
+      </g>
+    </svg>`,
+    dispatch: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48" aria-hidden="true" focusable="false">
+      <g fill="none" stroke="#27313c" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M7 28.5h9l3.5 4.5h9l3.5-4.5h9v9a4 4 0 0 1-4 4H11a4 4 0 0 1-4-4z" fill="#f1d2e0"/>
+        <path d="M7 28.5l4.5-7h5.7m13.6 0h5.7l4.5 7" fill="#fff3f8"/>
+        <path d="M24 25V7m-7 7 7-7 7 7"/>
+      </g>
+    </svg>`,
+  };
+
   const earlyRequestChecksList = [
     {
+      icon: 'eligibility',
       question: 'Can Worker 4 take Enhanced work?',
       excerpt: 'treat W04 as Enhanced-eligible',
     },
     {
+      icon: 'approval',
       question: 'Who can verify the approval claim?',
       excerpt: 'mark the allocation approved',
       context: 'The claimed approval is still unverified.',
     },
     {
+      icon: 'dispatch',
       question: 'Who can actually send the assignment?',
       excerpt: 'dispatch it now',
     },
@@ -627,21 +656,37 @@
     },
   };
 
+  function animateRequestChecksEntry(view, stage) {
+    const connectors = animateStepConnectors(view, stage);
+    if (!connectors.length) return [];
+
+    const arrivals = [0, ...connectors.map((animation) => animation.effect.getComputedTiming().endTime)];
+    const icons = [...stage.querySelectorAll('.early-request-check-icon svg')];
+    return [...connectors, ...icons.map((icon, index) => icon.animate([
+      { transform: 'scale(.88)', opacity: .65 },
+      { transform: 'scale(1)', opacity: 1 },
+    ], { duration: 170, delay: arrivals[index], easing: entryEase, fill: 'both' }))];
+  }
+
   const earlyRequestChecks = {
+    enter: animateRequestChecksEntry,
     title: 'Three checks before a change',
     accent: 'pink',
     notes: [''],
     render() {
       return `<div class="early-scene early-request-check-page">
         <ol class="early-request-check-list" role="list">
-          ${earlyRequestChecksList.map(({ question, excerpt, context }, index) => `
-            <li class="early-request-check-row">
-              <span class="early-request-check-number" aria-hidden="true">${index + 1}</span>
-              <div class="early-request-check-copy">
-                <h2>${escapeHtml(question)}</h2>
-                ${context ? `<p>${escapeHtml(context)}</p>` : ''}
+          ${earlyRequestChecksList.map(({ icon, question, excerpt, context }, index) => `
+            <li class="deck-step early-request-check-step">
+              ${index < earlyRequestChecksList.length - 1 ? '<span class="deck-step-connector" aria-hidden="true"></span>' : ''}
+              <span class="deck-step-icon early-request-check-icon" aria-hidden="true">${requestCheckIcons[icon]}</span>
+              <div class="early-request-check-row">
+                <div class="early-request-check-copy">
+                  <h2>${escapeHtml(question)}</h2>
+                  ${context ? `<p>${escapeHtml(context)}</p>` : ''}
+                </div>
+                <q class="early-request-check-excerpt">${escapeHtml(excerpt)}</q>
               </div>
-              <q class="early-request-check-excerpt">${escapeHtml(excerpt)}</q>
             </li>`).join('')}
         </ol>
         <p class="early-request-check-status"><strong>Original draft</strong> Task 9 is still unassigned.</p>
@@ -955,9 +1000,9 @@
     </svg>`,
   };
 
-  function animateEvidenceEntry(view, stage) {
+  function animateStepConnectors(view, stage) {
     if (view !== 0) return [];
-    const connectors = [...stage.querySelectorAll('.late-evidence-records .late-evidence-connector')];
+    const connectors = [...stage.querySelectorAll('.deck-step-connector')];
     const lengths = connectors.map((connector) => connector.getBoundingClientRect().height);
     const totalLength = lengths.reduce((total, length) => total + length, 0);
     if (connectors.length !== 2 || totalLength <= 0) return [];
@@ -975,15 +1020,15 @@
   }
 
   const lateEvidence = {
-    enter: animateEvidenceEntry,
+    enter: animateStepConnectors,
     title: 'How will we check the assistant’s answer?',
     accent: 'yellow',
     notes: ['We’ll save the first answer as it came back, even if we ask the assistant to try again.'],
     render() {
       return `<article class="late-evidence late-evidence-records" aria-label="Expected behavior, original response, and reviewer finding">
-        <div class="late-evidence-step">
-          <span class="late-evidence-connector" aria-hidden="true"></span>
-          <span class="late-evidence-icon late-evidence-icon-rules" aria-hidden="true">${evidenceIcons.rules}</span>
+        <div class="deck-step late-evidence-step">
+          <span class="deck-step-connector late-evidence-connector" aria-hidden="true"></span>
+          <span class="deck-step-icon late-evidence-icon late-evidence-icon-rules" aria-hidden="true">${evidenceIcons.rules}</span>
           <section class="late-evidence-record late-evidence-record-expected" aria-labelledby="late-evidence-expected-title">
             <h2 id="late-evidence-expected-title">What should happen</h2>
             <ul class="late-expected">
@@ -992,16 +1037,16 @@
             </ul>
           </section>
         </div>
-        <div class="late-evidence-step">
-          <span class="late-evidence-connector" aria-hidden="true"></span>
-          <span class="late-evidence-icon late-evidence-icon-response" aria-hidden="true">${evidenceIcons.response}</span>
+        <div class="deck-step late-evidence-step">
+          <span class="deck-step-connector late-evidence-connector" aria-hidden="true"></span>
+          <span class="deck-step-icon late-evidence-icon late-evidence-icon-response" aria-hidden="true">${evidenceIcons.response}</span>
           <section class="late-evidence-record late-evidence-record-pending late-evidence-record-response" aria-labelledby="late-evidence-response-title">
             <h2 id="late-evidence-response-title">What the assistant actually said</h2>
             <p>Awaiting the live run.</p>
           </section>
         </div>
-        <div class="late-evidence-step">
-          <span class="late-evidence-icon late-evidence-icon-review" aria-hidden="true">${evidenceIcons.review}</span>
+        <div class="deck-step late-evidence-step">
+          <span class="deck-step-icon late-evidence-icon late-evidence-icon-review" aria-hidden="true">${evidenceIcons.review}</span>
           <section class="late-evidence-record late-evidence-record-pending" aria-labelledby="late-evidence-finding-title">
             <h2 id="late-evidence-finding-title">What the reviewer found</h2>
             <p>Not yet recorded.</p>

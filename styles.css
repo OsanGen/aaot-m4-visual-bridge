@@ -1735,13 +1735,16 @@ body {
 }
 
 .early-request-check-list {
+  --step-icon-size: clamp(44px, 4.05vw, 55px);
+  --step-gap: clamp(8px, 1.3vw, 17px);
+  --step-line-color: #bd8ea5;
   display: grid;
-  gap: clamp(8px, 1.3vw, 17px);
+  gap: var(--step-gap);
 }
 
 .early-request-check-row {
   display: grid;
-  grid-template-columns: auto minmax(0, 1.35fr) minmax(0, .7fr);
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, .7fr);
   align-items: center;
   gap: 6px clamp(10px, 1.65vw, 23px);
   padding: clamp(12px, 1.65vw, 24px);
@@ -1749,14 +1752,9 @@ body {
   border-radius: 10px;
 }
 
-.early-request-check-number {
-  display: grid;
-  place-items: center;
-  width: clamp(28px, 3vw, 43px);
-  aspect-ratio: 1;
-  border-radius: 50%;
-  background: var(--pink);
-  font-weight: 750;
+.deck-step-icon.early-request-check-icon {
+  border-color: #dfc0d0;
+  background: #fbebf2;
 }
 
 .early-request-check-copy h2 {
@@ -1798,11 +1796,7 @@ body {
   }
 
   .early-request-check-row {
-    grid-template-columns: auto minmax(0, 1fr);
-  }
-
-  .early-request-check-excerpt {
-    grid-column: 2;
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
@@ -1824,33 +1818,33 @@ body {
 }
 
 .late-evidence-records {
-  --evidence-icon-size: clamp(44px, 4.05vw, 55px);
-  --evidence-step-gap: clamp(9px, 1.1vw, 15px);
+  --step-icon-size: clamp(44px, 4.05vw, 55px);
+  --step-gap: clamp(9px, 1.1vw, 15px);
   max-inline-size: 60rem;
-  gap: var(--evidence-step-gap);
+  gap: var(--step-gap);
 }
 
-.late-evidence-step {
+.deck-step {
   position: relative;
   display: grid;
-  grid-template-columns: var(--evidence-icon-size) minmax(0, 1fr);
+  grid-template-columns: var(--step-icon-size) minmax(0, 1fr);
   align-items: start;
   gap: clamp(9px, 1.4vw, 17px);
 }
 
-.late-evidence-icon {
+.deck-step-icon {
   position: relative;
   z-index: 1;
   display: grid;
   place-items: center;
-  inline-size: var(--evidence-icon-size);
-  block-size: var(--evidence-icon-size);
+  inline-size: var(--step-icon-size);
+  block-size: var(--step-icon-size);
   border: 1px solid var(--line);
   border-radius: 11px;
   background: var(--surface);
 }
 
-.late-evidence-icon svg {
+.deck-step-icon svg {
   display: block;
   inline-size: 73%;
   block-size: 73%;
@@ -1871,12 +1865,12 @@ body {
   background: #edf3ef;
 }
 
-.late-evidence-connector {
+.deck-step-connector {
   position: absolute;
-  inset-inline-start: calc(var(--evidence-icon-size) / 2 - 1px);
-  inset-block: calc(var(--evidence-icon-size) / 2) calc(-1 * (var(--evidence-step-gap) + var(--evidence-icon-size) / 2));
+  inset-inline-start: calc(var(--step-icon-size) / 2 - 1px);
+  inset-block: calc(var(--step-icon-size) / 2) calc(-1 * (var(--step-gap) + var(--step-icon-size) / 2));
   inline-size: 2px;
-  background: #a5aab3;
+  background: var(--step-line-color, #a5aab3);
   border-radius: 2px;
   transform-origin: center top;
   pointer-events: none;

@@ -464,15 +464,20 @@
       <h2>Worker time in the draft</h2>
       <table class="early-table">
         <thead><tr><th scope="col">Worker</th><th scope="col">Can take</th><th scope="col" class="early-number">Used in draft (min)</th><th scope="col" class="early-number">Time left (min)</th></tr></thead>
-        <tbody>${workers.map(({ id, eligible, load, spare }) => `<tr>
-          <th scope="row">${earlyName('Worker', id)}</th><td>${eligible.join(', ')}</td><td class="early-number">${load}</td><td class="early-number">${spare}</td>
-        </tr>`).join('')}</tbody>
+        <tbody>${workers.map(({ id, eligible, load, spare }) => {
+          const regularOnly = id === 'W04' && eligible.length === 1 && eligible.includes('Standard');
+          return `<tr>
+            <th scope="row">${earlyName('Worker', id)}</th>
+            <td${regularOnly ? ' class="early-regular-only"' : ''}>${regularOnly ? 'Regular work only' : eligible.join(', ')}</td>
+            <td class="early-number">${load}</td><td class="early-number">${spare}</td>
+          </tr>`;
+        }).join('')}</tbody>
       </table>
       <p class="early-table-foot">Standard is regular work.</p>
     </section>`;
   }
 
-  const earlyAllocation = {
+  const earlyShortage = {
     title: 'Why Task 9 stays unassigned',
     accent: 'blue',
     notes: ['360 minutes of work, 360 minutes of staff time. The rules say who can take each task.'],
@@ -483,30 +488,52 @@
       const enhancedCapacity = earlyTotal(available.filter((worker) => worker.eligible.includes('Enhanced')), 'remaining_minutes');
       const scale = Math.max(enhancedDemand, enhancedCapacity);
       const draft = allocationAt(work.length);
+      const workerOne = draft.workers.find((worker) => worker.id === 'W01');
       const workerFour = draft.workers.find((worker) => worker.id === 'W04');
-      return `<div class="early-scene early-allocation-answer">
-        <div class="early-allocation-comparison">
-          <section class="early-scale" aria-label="Compare Enhanced work with staff time for that work">
-            <p class="early-table-foot">Only workers whose records list Enhanced can take this work.</p>
+      return `<div class="early-scene early-shortage">
+        <section class="early-shortage-panel" aria-labelledby="early-shortage-title">
+          <h2 id="early-shortage-title">
+            <span>${enhancedDemand - enhancedCapacity} min</span>
+            <strong>short</strong>
+          </h2>
+          <div class="early-scale" aria-label="Compare Enhanced work with staff time for that work">
+            <p>Only workers whose records list Enhanced can take this work.</p>
             ${earlyScale('Enhanced work to assign', enhancedDemand, scale)}
             ${earlyScale('Time from workers who can take it', enhancedCapacity, scale)}
-          </section>
-          <div class="early-gap">
-            <h2>${enhancedDemand - enhancedCapacity} min short</h2>
-            <p>The draft gives Task 2 to Worker 1 first, using all 120 minutes available for Enhanced work.</p>
-            <p>Worker 4 has ${workerFour.spare} of their starting ${workerFour.remaining_minutes} minutes left in the draft, all for regular work.</p>
           </div>
+        </section>
+        <div class="early-shortage-reasons">
+          <section>
+            <h2>Worker 1</h2>
+            <p>Task 2 comes first in the draft. It takes Worker 1’s ${workerOne.load} minutes, all the available time for Enhanced work.</p>
+          </section>
+          <section>
+            <h2>Worker 4</h2>
+            <p>Started with ${workerFour.remaining_minutes} minutes and has ${workerFour.spare} left in the draft. They can only take regular work.</p>
+          </section>
         </div>
+      </div>`;
+    },
+  };
+
+  const earlyAllocation = {
+    title: 'Where the work and time went',
+    accent: 'blue',
+    notes: [''],
+    render() {
+      const work = fixture.remaining_in_source_order;
+      const draft = allocationAt(work.length);
+      return `<div class="early-scene early-allocation-details">
+        <dl class="early-metrics" aria-label="Minutes in the draft">
+          <div><dt>Assigned in the draft</dt><dd>${draft.proposed} min</dd></div>
+          <div><dt>Work left unassigned</dt><dd>${draft.unassigned} min</dd></div>
+          <div><dt>Staff time still free</dt><dd>${draft.unused} min</dd></div>
+        </dl>
         <div class="early-allocation-tables">
           ${earlyWorkTable(work, draft.assignments)}
           ${earlyWorkerTable(draft.workers)}
         </div>
-        <dl class="early-metrics" aria-label="Minutes in the draft">
-          <div><dt>Proposed assignments</dt><dd>${draft.proposed} min</dd></div>
-          <div><dt>Work left unassigned</dt><dd>${draft.unassigned} min</dd></div>
-          <div><dt>Staff time left</dt><dd>${draft.unused} min</dd></div>
-        </dl>
-        <p class="early-allocation-boundary">Other drafts can place regular work differently. Task 9 still needs an eligible worker.</p>
+        <p class="early-allocation-boundary">Other drafts can place regular work differently. Task 9 still needs someone who can take Enhanced work.</p>
       </div>`;
     },
   };
@@ -578,7 +605,7 @@
     },
   };
 
-  const firstScenes = [earlyDesign, earlyCurrent, earlyAllocation, earlyRequest];
+  const firstScenes = [earlyDesign, earlyCurrent, earlyShortage, earlyAllocation, earlyRequest];
 
   const lateInputs = [
     {

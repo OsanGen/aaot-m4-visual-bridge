@@ -445,38 +445,6 @@
     </div>`;
   }
 
-  function earlyWorkTable(work, assignments) {
-    return `<section class="early-allocation-table">
-      <h2>Tasks in the original list</h2>
-      <table class="early-table">
-        <thead><tr><th scope="col">Task</th><th scope="col">Kind of work</th><th scope="col" class="early-number">Minutes</th><th scope="col">Draft assignment</th></tr></thead>
-        <tbody>${work.map(({ id, category, minutes }) => `<tr>
-          <th scope="row">${earlyName('Task', id)}</th><td>${category}</td><td class="early-number">${minutes}</td>
-          <td${assignments[id] ? '' : ' class="early-unassigned"'}>${assignments[id] ? earlyName('Worker', assignments[id]) : 'Unassigned'}</td>
-        </tr>`).join('')}</tbody>
-      </table>
-      <p class="early-table-foot"><strong>Order in the rules:</strong> ${fixture.processing_order.map((id) => earlyName('Task', id)).join(' → ')}</p>
-    </section>`;
-  }
-
-  function earlyWorkerTable(workers) {
-    return `<section class="early-allocation-table">
-      <h2>Worker time in the draft</h2>
-      <table class="early-table">
-        <thead><tr><th scope="col">Worker</th><th scope="col">Can take</th><th scope="col" class="early-number">Used in draft (min)</th><th scope="col" class="early-number">Time left (min)</th></tr></thead>
-        <tbody>${workers.map(({ id, eligible, load, spare }) => {
-          const regularOnly = id === 'W04' && eligible.length === 1 && eligible.includes('Standard');
-          return `<tr>
-            <th scope="row">${earlyName('Worker', id)}</th>
-            <td${regularOnly ? ' class="early-regular-only"' : ''}>${regularOnly ? 'Regular work only' : eligible.join(', ')}</td>
-            <td class="early-number">${load}</td><td class="early-number">${spare}</td>
-          </tr>`;
-        }).join('')}</tbody>
-      </table>
-      <p class="early-table-foot">Standard is regular work.</p>
-    </section>`;
-  }
-
   const earlyShortage = {
     title: 'Why Task 9 stays unassigned',
     accent: 'blue',
@@ -516,24 +484,95 @@
     },
   };
 
-  const earlyAllocation = {
-    title: 'Where the work and time went',
+  const earlyTasks = {
+    title: 'Who gets each task in the draft?',
     accent: 'blue',
     notes: [''],
     render() {
       const work = fixture.remaining_in_source_order;
       const draft = allocationAt(work.length);
-      return `<div class="early-scene early-allocation-details">
-        <dl class="early-metrics" aria-label="Minutes in the draft">
+      return `<section class="draft-tasks" aria-label="Example task assignments">
+        <dl class="draft-tasks-totals" aria-label="Minutes in the draft">
           <div><dt>Assigned in the draft</dt><dd>${draft.proposed} min</dd></div>
-          <div><dt>Work left unassigned</dt><dd>${draft.unassigned} min</dd></div>
-          <div><dt>Staff time still free</dt><dd>${draft.unused} min</dd></div>
+          <div><dt>Work still unassigned</dt><dd>${draft.unassigned} min</dd></div>
         </dl>
-        <div class="early-allocation-tables">
-          ${earlyWorkTable(work, draft.assignments)}
-          ${earlyWorkerTable(draft.workers)}
+        <ul class="draft-tasks-list" role="list" aria-label="Tasks in their original order">
+          ${work.map(({ id, category, minutes }) => {
+            const worker = draft.assignments[id];
+            return `<li class="draft-tasks-ticket${worker ? '' : ' draft-tasks-unassigned'}">
+              <div class="draft-tasks-name">${earlyArt('A003', 'draft-tasks-art')}<strong>${earlyName('Task', id)}</strong></div>
+              <div class="draft-tasks-details"><span>${category}</span><span>${minutes} min</span></div>
+              <div class="draft-tasks-result">
+                <span class="draft-tasks-symbol" aria-hidden="true">${worker ? '→' : 'Ⅱ'}</span>
+                <strong>${worker ? earlyName('Worker', worker) : 'Unassigned'}</strong>
+              </div>
+            </li>`;
+          }).join('')}
+        </ul>
+        <div class="draft-tasks-order">
+          <strong id="draft-tasks-order-label">Order required by the rules</strong>
+          <ol role="list" aria-labelledby="draft-tasks-order-label">${fixture.processing_order.map((id, index) => `
+            <li>${index ? '<span aria-hidden="true">→</span>' : ''}<span>${earlyName('Task', id)}</span></li>`).join('')}</ol>
         </div>
-        <p class="early-allocation-boundary">Other drafts can place regular work differently. Task 9 still needs someone who can take Enhanced work.</p>
+      </section>`;
+    },
+  };
+
+  function renderDraftWorker(worker, scale) {
+    const { id, eligible, load, spare, remaining_minutes: openingTime } = worker;
+    const showRegularOnly = id === 'W04' && eligible.length === 1 && eligible.includes('Standard');
+    const zeroTime = openingTime === 0;
+    return `<li class="draft-workers-row${showRegularOnly ? ' draft-workers-row-emphasis' : ''}">
+      <div class="draft-workers-name">
+        <h2>${earlyName('Worker', id)}</h2>
+        <p>${showRegularOnly ? 'Regular work only' : eligible.join(' and ')}</p>
+      </div>
+      <div class="draft-workers-track${zeroTime ? ' draft-workers-track-empty' : ''}" aria-hidden="true">
+        ${load ? `<span class="draft-workers-assigned" style="width:${100 * load / scale}%"></span>` : ''}
+        ${spare ? `<span class="draft-workers-free" style="width:${100 * spare / scale}%"></span>` : ''}
+      </div>
+      <p class="draft-workers-breakdown">
+        ${zeroTime ? '<span><strong>0 min</strong> available</span>' : `
+          <span><strong>${load} min</strong> assigned</span>
+          <span><strong>${spare} min</strong> free</span>`}
+      </p>
+    </li>`;
+  }
+
+  const earlyWorkerTime = {
+    title: 'Who still has time?',
+    accent: 'blue',
+    notes: [''],
+    render() {
+      const draft = allocationAt(fixture.remaining_in_source_order.length);
+      const openingCapacity = Math.max(0, ...draft.workers.map(({ remaining_minutes }) => remaining_minutes));
+      const scale = openingCapacity || 1;
+      const tickLabels = [0, 1, 2, 3].map((tick) => Math.round(tick * openingCapacity / 3));
+
+      return `<div class="draft-workers">
+        <div class="draft-workers-overview">
+          <div class="draft-workers-total">
+            ${earlyArt('A004', 'draft-workers-art')}
+            <strong>${draft.unused} min</strong>
+            <span>staff time still free</span>
+          </div>
+          <ul class="draft-workers-key" aria-label="Bar colors">
+            <li><span class="draft-workers-assigned" aria-hidden="true"></span>Assigned in the draft</li>
+            <li><span class="draft-workers-free" aria-hidden="true"></span>Free</li>
+          </ul>
+        </div>
+        <section class="draft-workers-chart" aria-label="Assigned and free staff time by worker">
+          <div class="draft-workers-axis" aria-hidden="true">
+            <div>${tickLabels.map((tick, index) => `<span>${tick}${index === tickLabels.length - 1 ? ' min' : ''}</span>`).join('')}</div>
+          </div>
+          <ul class="draft-workers-rows" role="list" aria-label="Workers">
+            ${draft.workers.map((worker) => renderDraftWorker(worker, scale)).join('')}
+          </ul>
+        </section>
+        <div class="draft-workers-caption">
+          <p>Standard is regular work.</p>
+          <p>Other drafts can place regular work differently. Task 9 still needs someone who can take Enhanced work.</p>
+        </div>
       </div>`;
     },
   };
@@ -605,7 +644,7 @@
     },
   };
 
-  const firstScenes = [earlyDesign, earlyCurrent, earlyShortage, earlyAllocation, earlyRequest];
+  const firstScenes = [earlyDesign, earlyCurrent, earlyShortage, earlyTasks, earlyWorkerTime, earlyRequest];
 
   const lateInputs = [
     {

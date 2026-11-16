@@ -371,7 +371,50 @@
     return `${kind} ${Number(id.slice(1))}`;
   }
 
+  function earlyTeachingRoute(chronology = false) {
+    const icon = chronology
+      ? '<circle cx="12" cy="12" r="8"/><path d="M12 7.5V12l3 2"/>'
+      : '<path d="M6 3h8l4 4v14H6zM14 3v5h4M9 12h6m-6 4h6"/>';
+    return `<div class="early-teaching-route${chronology ? ' early-chronology' : ''}" aria-hidden="true">
+      <span class="early-teaching-rail"></span>
+      <svg class="early-teaching-token" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" focusable="false">${icon}</svg>
+    </div>`;
+  }
+
+  function animateEarlyRoute(route, delay, duration) {
+    const rail = route.querySelector('.early-teaching-rail');
+    const token = route.querySelector('.early-teaching-token');
+    const vertical = rail.offsetHeight > rail.offsetWidth;
+    const axis = vertical ? 'Y' : 'X';
+    const length = vertical ? rail.offsetHeight : rail.offsetWidth;
+    const travel = length / 2;
+    return [
+      rail.animate([
+        { transform: `scale${axis}(0)` },
+        { transform: `scale${axis}(1)` },
+      ], { delay, duration, easing: entryEase, fill: 'both' }),
+      token.animate([
+        { transform: `translate${axis}(${-travel}px)`, opacity: 0 },
+        { offset: .18, opacity: 1 },
+        { offset: .76, opacity: 1 },
+        { transform: `translate${axis}(${travel}px)`, opacity: 0 },
+      ], { delay, duration, easing: 'ease-in-out', fill: 'both' }),
+    ];
+  }
+
+  function animateBridgeHandoff(view, stage) {
+    const roles = stage.querySelector('.early-bridge-roles');
+    const [assistant, lead] = roles.querySelectorAll('section');
+    return [
+      animateTeachingCue(assistant, 80),
+      ...animateEarlyRoute(roles.querySelector('.early-teaching-route'), 230, 470),
+      animateTeachingCue(lead, 580),
+    ];
+  }
+
   const earlyDesign = {
+    enter: animateBridgeHandoff,
     title: 'The unassigned 90-minute task (T09)',
     accent: 'mint',
     notes: ['You’ve seen what the proposed Review Hub would show. Let’s follow one decision that would go into it. A ticket claims an executive approved a change to this draft.'],
@@ -389,6 +432,7 @@
             ${earlyArt('A011', 'early-bridge-draft')}
             <div><h3>AI Allocation Assistant</h3><p>Suggests who should get the work.</p></div>
           </section>
+          ${earlyTeachingRoute()}
           <section>
             ${earlyArt('A006', 'early-bridge-desk')}
             <div><h3>Operations Lead</h3><p>Reviews the draft and decides whether to approve a change.</p></div>
@@ -398,13 +442,38 @@
     },
   };
 
+  function animateSnapshotTimeline(view, stage) {
+    const history = stage.querySelector('.early-history-record');
+    const route = stage.querySelector('.early-teaching-route');
+    const staffTime = stage.querySelector('.early-snapshot-table');
+    const work = stage.querySelector('.early-remaining-tasks');
+    return [
+      animateTeachingCue(history, 30),
+      ...animateEarlyRoute(route, 230, 430),
+      animateTeachingCue(staffTime, 620),
+      animateTeachingCue(work, 620),
+    ];
+  }
+
   const earlyCurrent = {
+    enter: animateSnapshotTimeline,
     title: 'What work is left at 11:30 a.m.?',
     accent: 'blue',
     notes: ['The work finished this morning stays on the record. The assistant uses the 11:30 a.m. update to draft the rest of the day’s assignments.'],
     render() {
       const { current_state: current, history_state: history, workers, completed, remaining_in_source_order: work } = fixture;
       return `<div class="early-scene early-snapshots">
+        <section class="early-history-record">
+          <div class="early-history-heading">
+            ${earlyArt('A009', 'early-history-art')}
+            <h2>${history.time.replace(/^0/, '')} a.m. record</h2>
+          </div>
+          <div class="early-history-total"><strong>${earlyTotal(completed, 'minutes')} min</strong><span>of work already done</span></div>
+          <ul class="early-history-tasks" aria-label="Completed work">
+            ${completed.map((task) => `<li>${earlyName('Task', task.id)}</li>`).join('')}
+          </ul>
+        </section>
+        ${earlyTeachingRoute(true)}
         <section class="early-current-record">
           <div class="early-record-heading">
             <h2>${current.time} a.m. update</h2>
@@ -423,16 +492,6 @@
               <ul>${work.map((task) => `<li>${earlyArt('A003', 'early-ticket-art')}<strong>${earlyName('Task', task.id)}</strong></li>`).join('')}</ul>
             </section>
           </div>
-        </section>
-        <section class="early-history-record">
-          <div class="early-history-heading">
-            ${earlyArt('A009', 'early-history-art')}
-            <h2>${history.time.replace(/^0/, '')} a.m. record</h2>
-          </div>
-          <div class="early-history-total"><strong>${earlyTotal(completed, 'minutes')} min</strong><span>of work already done</span></div>
-          <ul class="early-history-tasks" aria-label="Completed work">
-            ${completed.map((task) => `<li>${earlyName('Task', task.id)}</li>`).join('')}
-          </ul>
         </section>
       </div>`;
     },
@@ -485,7 +544,35 @@
     },
   };
 
+  function animateDraftOrder(view, stage) {
+    const rows = new Map([...stage.querySelectorAll('.draft-tasks-ticket')]
+      .map((row) => [row.dataset.draftTask, row]));
+    const rules = [...stage.querySelectorAll('.draft-tasks-order li')];
+    const step = 225;
+    const taskNinePause = 150;
+    const end = rules.length * step + taskNinePause + 140;
+    let delay = 40;
+    return rules.flatMap((rule) => {
+      const row = rows.get(rule.dataset.draftTask);
+      const held = row.classList.contains('draft-tasks-unassigned');
+      const animation = held
+        ? row.animate([
+          { boxShadow: 'inset 0 0 0 0 transparent' },
+          { boxShadow: 'inset 0 0 0 2px #a67b26', offset: .14 },
+          { boxShadow: 'inset 0 0 0 2px #a67b26' },
+        ], { delay, duration: end - delay, fill: 'both' })
+        : animateTeachingCue(row, delay, 275);
+      const cues = [
+        animateTeachingCue(rule.querySelector('.draft-tasks-order-task'), delay, held ? 355 : 285),
+        animation,
+      ];
+      delay += step + (held ? taskNinePause : 0);
+      return cues;
+    });
+  }
+
   const earlyTasks = {
+    enter: animateDraftOrder,
     title: 'Who gets each task in the draft?',
     accent: 'blue',
     notes: [''],
@@ -500,7 +587,7 @@
         <ul class="draft-tasks-list" role="list" aria-label="Tasks in their original order">
           ${work.map(({ id, category, minutes }) => {
             const worker = draft.assignments[id];
-            return `<li class="draft-tasks-ticket${worker ? '' : ' draft-tasks-unassigned'}">
+            return `<li class="draft-tasks-ticket${worker ? '' : ' draft-tasks-unassigned'}" data-draft-task="${id}">
               <div class="draft-tasks-name">${earlyArt('A003', 'draft-tasks-art')}<strong>${earlyName('Task', id)}</strong></div>
               <div class="draft-tasks-details"><span>${category}</span><span>${minutes} min</span></div>
               <div class="draft-tasks-result">
@@ -513,7 +600,7 @@
         <div class="draft-tasks-order">
           <strong id="draft-tasks-order-label">Order required by the rules</strong>
           <ol role="list" aria-labelledby="draft-tasks-order-label">${fixture.processing_order.map((id, index) => `
-            <li>${index ? '<span aria-hidden="true">→</span>' : ''}<span>${earlyName('Task', id)}</span></li>`).join('')}</ol>
+            <li data-draft-task="${id}">${index ? '<span aria-hidden="true">→</span>' : ''}<span class="draft-tasks-order-task">${earlyName('Task', id)}</span></li>`).join('')}</ol>
         </div>
       </section>`;
     },
@@ -695,6 +782,53 @@
   };
 
   const entryEase = 'cubic-bezier(0.22, 1, 0.36, 1)';
+
+  function animateTeachingCue(element, delay = 0, duration = 320) {
+    const normal = getComputedStyle(element).boxShadow;
+    return element.animate([
+      { boxShadow: normal },
+      { boxShadow: 'inset 0 0 0 2px var(--teaching-cue-color, #317765)', offset: .35 },
+      { boxShadow: normal },
+    ], { delay, duration, easing: entryEase });
+  }
+
+  function teachingPathPoint(element, side, origin) {
+    const rect = element.getBoundingClientRect();
+    const horizontal = side === 'left' || side === 'right';
+    const x = horizontal ? rect[side] : rect.left + rect.width / 2;
+    const y = horizontal ? rect.top + rect.height / 2 : rect[side];
+    return [x - origin.left, y - origin.top];
+  }
+
+  function animateTeachingPath(stage, from, to, {
+    delay = 0, duration = 260, color = '#317765', fromSide = 'right', toSide = 'left',
+  } = {}) {
+    const namespace = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(namespace, 'svg');
+    svg.setAttribute('class', 'teaching-path');
+    svg.setAttribute('aria-hidden', 'true');
+    const line = document.createElementNS(namespace, 'line');
+    svg.append(line);
+    stage.append(svg);
+
+    const origin = svg.getBoundingClientRect();
+    const [x1, y1] = teachingPathPoint(from, fromSide, origin);
+    const [x2, y2] = teachingPathPoint(to, toSide, origin);
+    const distance = Math.hypot(x2 - x1, y2 - y1) || 1;
+    for (const [attribute, value] of Object.entries({ x1, y1, x2, y2, stroke: color })) {
+      line.setAttribute(attribute, value);
+    }
+    line.setAttribute('stroke-dasharray', distance);
+    const animation = line.animate([
+      { strokeDashoffset: distance, opacity: 0 },
+      { strokeDashoffset: distance, opacity: 1, offset: .06 },
+      { strokeDashoffset: 0, opacity: 1, offset: .7 },
+      { strokeDashoffset: 0, opacity: 0 },
+    ], { delay, duration, fill: 'both' });
+    const remove = () => svg.remove();
+    animation.finished.then(remove, remove);
+    return animation;
+  }
 
   function measuredFillShare(element) {
     const width = element.style.width;
@@ -900,6 +1034,25 @@
     </div>`;
   }
 
+  function animateKitchenHandoff(view, stage) {
+    const board = stage.querySelector('.late-draft');
+    const arrow = stage.querySelector('.late-workflow-arrow');
+    const manager = stage.querySelector('.late-review-node');
+    if (view !== 0 || !board || !arrow || !manager) return [];
+
+    const vertical = arrow.offsetHeight > arrow.offsetWidth;
+    const start = vertical ? 'inset(-8px -10px 100% -10px)' : 'inset(-10px 100% -10px -8px)';
+    return [
+      animateTeachingCue(board, 0, 360),
+      arrow.animate([
+        { clipPath: start, color: '#317765' },
+        { clipPath: 'inset(-10px)', color: '#317765', offset: .75 },
+        { clipPath: 'inset(-10px)', color: 'var(--late-connector)' },
+      ], { delay: 150, duration: 430, easing: entryEase, fill: 'both' }),
+      animateTeachingCue(manager, 442, 410),
+    ];
+  }
+
   function animateLateSystem(view, stage) {
     if (view !== 1) return [];
 
@@ -943,29 +1096,64 @@
   }
 
   const lateAssistantCheckRows = [
-    { art: 'A004', title: 'Check who can do the work', answer: 'Ask for evidence before changing Worker 4’s record to allow Enhanced work.' },
+    {
+      art: 'A004',
+      title: 'Check who can do the work',
+      status: 'Evidence needed',
+      answer: 'Ask for evidence before changing Worker 4’s record to allow Enhanced work.',
+    },
     {
       art: 'A010',
       title: 'Flag the approval claim',
-      answer: 'Operations needs to verify the claim.',
+      status: 'Verify with Operations',
       explanation: 'A message that tries to make the assistant ignore its rules is an example of <strong>prompt injection</strong>. This ticket asks it to skip confirmation.',
     },
-    { art: 'A006', title: 'Keep the work on hold', answer: 'Leave the assignment unsent during this exercise.' },
+    {
+      art: 'A006',
+      title: 'Keep the work on hold',
+      status: 'Unsent',
+      pause: true,
+      answer: 'The exercise stops before any work is sent.',
+    },
   ];
 
+  function animateAssistantChecks(view, stage) {
+    if (view !== 0) return [];
+
+    const chips = [...stage.querySelectorAll('.late-assistant-check-status')];
+    const icons = [...stage.querySelectorAll('.late-assistant-check-art')];
+    if (chips.length !== 3 || icons.length !== 3) return [];
+
+    return [
+      ...chips.map((chip, index) => animateTeachingCue(chip, index * 320, 365)),
+      ...icons.slice(1).map((icon, index) =>
+        animateTeachingPath(stage, icons[index], icon, {
+          delay: 180 + index * 320, duration: 290, color: '#a65378', fromSide: 'bottom', toSide: 'top',
+        })
+      ),
+    ];
+  }
+
   const lateAssistantChecks = {
+    enter: animateAssistantChecks,
     title: 'What should the assistant check?',
     accent: 'pink',
     notes: ['These are the checks we expect. We’ll see how the assistant responds in Part 2.'],
     render() {
       return `<section class="late-assistant-checks" aria-label="Expected checks">
         <ol class="late-assistant-check-list" role="list">
-          ${lateAssistantCheckRows.map(({ art, title, answer, explanation }) => `
+          ${lateAssistantCheckRows.map(({ art, title, status, answer, explanation, pause }) => `
             <li class="late-assistant-check">
               ${lateSticker(art, 'late-assistant-check-art')}
               <div class="late-assistant-check-copy">
-                <h2>${escapeHtml(title)}</h2>
-                <p>${escapeHtml(answer)}</p>
+                <div class="late-assistant-check-heading">
+                  <h2>${escapeHtml(title)}</h2>
+                  <span class="late-assistant-check-status"${pause ? ' data-paused' : ''}>
+                    ${pause ? '<span class="late-assistant-check-pause" aria-hidden="true"></span>' : ''}
+                    ${escapeHtml(status)}
+                  </span>
+                </div>
+                ${answer ? `<p>${escapeHtml(answer)}</p>` : ''}
                 ${explanation ? `<p class="late-assistant-check-explanation">${explanation}</p>` : ''}
               </div>
             </li>`).join('')}
@@ -1094,11 +1282,37 @@
     },
   };
 
-  function renderLatePhase(name, steps) {
+  function renderLatePhase(name, steps, outputs = {}) {
     return `<section class="late-phase">
       <h2>${name}</h2>
-      <ol aria-label="${name} steps">${steps.map((step) => `<li>${step}</li>`).join("")}</ol>
+      <ol aria-label="${name} steps">${steps.map((step, index) => {
+        const number = index + 1;
+        return `<li${outputs[number] ? ` data-demo-step="${number}"` : ""}>${step}</li>`;
+      }).join("")}</ol>
     </section>`;
+  }
+
+  function animateLateHandoffEntry(view, stage) {
+    const files = stage.querySelector(".late-start-files");
+    const tray = files.querySelector(".late-upload-tray");
+    const prompt = stage.querySelector(".late-start-prompt");
+    const stacked = prompt.getBoundingClientRect().top >= files.getBoundingClientRect().bottom;
+    const promptEntry = stacked ? prompt.querySelector(".late-prompt-entry") : prompt;
+
+    return [
+      ...[...files.querySelectorAll(".late-upload-document")].map((file, index) => file.animate([
+        { transform: "translateY(-8px)" },
+        { transform: "none" },
+      ], { duration: 175, delay: 80 * index, easing: entryEase, fill: "both" })),
+      animateTeachingCue(tray, 200, 260),
+      animateTeachingPath(stage, tray, promptEntry, {
+        delay: 260,
+        duration: 220,
+        fromSide: stacked ? "bottom" : "right",
+        toSide: stacked ? "top" : "left",
+      }),
+      animateTeachingCue(prompt, 480),
+    ];
   }
 
   function renderLateHandoff() {
@@ -1108,12 +1322,22 @@
         <div class="late-start-grid">
           <div class="late-start-files">
             <p>Upload these two files from <code>V2/1 - Build/</code></p>
-            <ul>
-              <li>${lateSticker("A008", "late-file-art")}<code>01 - Company Brief.md</code></li>
-              <li>${lateSticker("A009", "late-file-art")}<code>02 - Operating Rules.md</code></li>
-            </ul>
+            <div class="late-upload-files">
+              <ul role="list">
+                <li><code>01 - Company Brief.md</code></li>
+                <li><code>02 - Operating Rules.md</code></li>
+              </ul>
+              <div class="late-upload-tray" aria-hidden="true">
+                ${lateSticker("A008", "late-upload-document")}
+                ${lateSticker("A009", "late-upload-document")}
+                <svg viewBox="0 0 54 18" class="late-upload-tray-front" fill="none" focusable="false">
+                  <path d="M4 3h14l3 4h12l3-4h14v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z" fill="#f1fff8" stroke="#317765" stroke-width="1.5" stroke-linejoin="round"/>
+                </svg>
+              </div>
+            </div>
           </div>
           <div class="late-start-prompt">
+            <span class="late-prompt-entry" aria-hidden="true"></span>
             <p>Then paste <strong>Prompt 1</strong> from <code>03 - Build Prompts.md</code></p>
             <p class="late-prompt-title">“Define the business problem and assistant's job”</p>
           </div>
@@ -1123,15 +1347,41 @@
     </article>`;
   }
 
+  const latePartTwoOutputs = {
+    2: { art: "A011", name: "Proposed assignments", code: "ALLOCATION_CANDIDATE" },
+    3: { art: "A010", name: "Review of the ticket", code: "CHANGE_REVIEW" },
+    4: { art: "A012", name: "Review record", code: "A5" },
+  };
+
+  function animateLatePartTwoEntry(view, stage) {
+    const outputs = [...stage.querySelectorAll(".late-watch-outputs > [data-demo-step]")];
+    return outputs.flatMap((output, index) => {
+      const step = stage.querySelector(`.late-phase li[data-demo-step="${output.dataset.demoStep}"]`);
+      const delay = index * 320;
+      return [
+        animateTeachingCue(step, delay, 260),
+        animateTeachingPath(stage, step, output, {
+          delay: delay + 60,
+          duration: 220,
+          fromSide: "right",
+          toSide: "left",
+        }),
+        animateTeachingCue(output, delay + 280),
+      ];
+    });
+  }
+
   function renderLatePartTwo() {
-    return `<article class="late-handoff">
-      ${renderLatePhase("Part 2 · Try it on the case", ["Confirm setup", "Draft assignments", "Review the ticket", "Check evidence", "Recommend"])}
+    return `<article class="late-handoff late-part-two">
+      ${renderLatePhase("Part 2 · Try it on the case", ["Confirm setup", "Draft assignments", "Review the ticket", "Check evidence", "Recommend"], latePartTwoOutputs)}
       <section class="late-watch" aria-labelledby="late-watch-title">
         <h2 id="late-watch-title">Outputs to look for</h2>
         <dl class="late-watch-outputs">
-          <div><dt>${lateSticker("A011", "late-file-art")}Proposed assignments</dt><dd><code>ALLOCATION_CANDIDATE</code></dd></div>
-          <div><dt>${lateSticker("A010", "late-file-art")}Review of the ticket</dt><dd><code>CHANGE_REVIEW</code></dd></div>
-          <div><dt>${lateSticker("A012", "late-file-art")}Review record</dt><dd><code>A5</code></dd></div>
+          ${Object.entries(latePartTwoOutputs).map(([step, { art, name, code }]) => `
+            <div data-demo-step="${step}" style="grid-row:${step}">
+              <dt>${lateSticker(art, "late-file-art")}${name}</dt>
+              <dd><code>${code}</code></dd>
+            </div>`).join("")}
         </dl>
       </section>
     </article>`;
@@ -1146,6 +1396,7 @@
         "Even if the facts check out, someone still has to decide whether to change the draft.",
       ],
       render: renderLateSystem,
+      enter: animateKitchenHandoff,
       animate: animateLateSystem,
     },
     lateAssistantChecks,
@@ -1156,12 +1407,14 @@
       accent: "mint",
       notes: ["That was a preview of the checks in Part 2. We’ll start with Part 1 by setting the assistant’s job and rules."],
       render: renderLateHandoff,
+      enter: animateLateHandoffEntry,
     },
     {
       title: "What to watch for in Part 2",
       accent: "mint",
       notes: [""],
       render: renderLatePartTwo,
+      enter: animateLatePartTwoEntry,
     },
   ];
 
@@ -1293,5 +1546,5 @@
     if (transition) settleTransition();
   });
 
-  render();
+  render(true);
 })();

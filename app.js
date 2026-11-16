@@ -359,972 +359,602 @@
     }
   };
 
-  function earlyEnter(beat, target) {
-    return beat === target ? ' data-enter' : '';
+  function earlyArt(id, className) {
+    return sticker(id, className, { decorative: true });
   }
 
-  function earlyCompletedMinutes() {
-    return fixture.completed.reduce((total, task) => total + task.minutes, 0);
+  function earlyTotal(items, field) {
+    return items.reduce((total, item) => total + item[field], 0);
   }
-
-  const earlyDesignTopics = ['Workflow', 'Safeguards and owners', 'Response and recovery'];
-  const earlyModules = ['Overall instructions', 'Business Rules', 'Allocation Workflow', 'Security & Recovery', 'Reports & Pilot'];
 
   const earlyDesign = {
     title: 'Design before use.',
-    takeaway: 'Design and package the approach before using it. A written design is not operational proof.',
-    narration: "You have seen why oversight matters. Now we will make it concrete. Before assigning work, we define the assistant's job, preserve the business rules, and develop the checks and human responsibilities. Those become instructions and reference material. A written safeguard is a proposal, not evidence that a technical control exists or works.",
-    cue: 'Now give that design the current work.',
-    seconds: 30,
-    hold: 5,
-    beats: [
-      { label: 'Continue', duration: 600 },
-      { label: 'Continue', duration: 860 },
-      { label: 'Continue', duration: 800 },
-    ],
-    render(beat) {
+    accent: 'mint',
+    notes: ['Use the company brief and operating rules to define the assistant’s job. Name who reviews the draft.'],
+    render() {
       return `<div class="early-scene early-design">
-        <p class="early-lead">AI means artificial intelligence.</p>
-        <div class="early-design-grid">
-          <section class="early-sources" aria-label="Source materials">
-            <div class="early-source-items">
-              ${['Company brief', 'Operating rules'].map((name) => `
-                <div>${sticker('A008', 'early-source-image')}<strong>${name}</strong></div>`).join('')}
-            </div>
-            <p>Start with the job and existing business rules.</p>
-            ${beat >= 1 ? '<p class="early-connector">Supplies context <span aria-hidden="true">→</span></p>' : ''}
-          </section>
-          <section class="early-board" aria-label="Drafting workspace">
-            <div class="early-board-art" aria-hidden="true">
-              ${sticker('A001', 'early-design-board')}${sticker('A002', 'early-design-rail')}
-              ${sticker('A005', 'early-design-binder')}
-            </div>
-            ${beat === 2 ? `
-              <div class="early-proposal">
-                <p class="early-connector" data-enter>Develop proposed design</p>
-                <h3 data-enter>Develop the workflow, safeguards, and review responsibilities.</h3>
-                <ul>${earlyDesignTopics.map((topic) => `<li data-enter>${topic}</li>`).join('')}</ul>
-              </div>` : ''}
-            ${beat >= 3 ? `
-              <div class="early-package" data-enter>
-                <p class="early-connector">Package</p>
-                <h3>Package the proposed design.</h3>
-                <div class="early-package-files">
-                  ${sticker('A008', 'early-config-image')}
-                  <ul>${earlyModules.map((name) => `<li>${escapeHtml(name)}</li>`).join('')}</ul>
-                  <div class="early-handoff">${sticker('A011', 'early-config-image')}<strong>Matching handoff</strong></div>
-                </div>
-                <p><strong>Configuration:</strong> the instructions and reference modules used for this exercise.</p>
-                <p class="early-note">Proposed design. Behavior not yet tested.</p>
-              </div>` : ''}
-          </section>
-          <section class="early-review" aria-label="Human review">
-            ${beat >= 3 ? '<p class="early-connector" data-enter>For human review <span aria-hidden="true">→</span></p>' : ''}
-            <h3>Operations Lead review</h3>
-            ${sticker('A006', 'early-review-image')}
-          </section>
-        </div>
+        <section class="early-design-sources">
+          <h2>Start with the business</h2>
+          <ul class="early-source-files">
+            <li>${earlyArt('A008', 'early-file-art')}<strong>Company brief</strong></li>
+            <li>${earlyArt('A008', 'early-file-art')}<strong>Operating rules</strong></li>
+          </ul>
+        </section>
+        <div class="early-flow"><span>Supplies context</span><span aria-hidden="true">→</span></div>
+        <section class="early-design-package">
+          <div class="early-design-art">${earlyArt('A001', 'early-board-art')}</div>
+          <div>
+            <h2>Proposed configuration</h2>
+            <p class="early-package-definition">The instructions and reference modules used for this exercise.</p>
+            <p class="early-instructions">Overall instructions</p>
+            <ul class="early-modules">
+              <li>Business Rules</li>
+              <li>Allocation Workflow</li>
+              <li>Security &amp; Recovery</li>
+              <li>Reports &amp; Pilot</li>
+            </ul>
+          </div>
+          <div class="early-package-footer">
+            <span>${earlyArt('A011', 'early-handoff-art')}<strong>Matching handoff</strong></span>
+            <p>Behavior not yet tested.</p>
+          </div>
+        </section>
+        <div class="early-flow"><span>For human review</span><span aria-hidden="true">→</span></div>
+        <section class="early-design-review">
+          ${earlyArt('A006', 'early-review-art')}
+          <h2>Operations Lead review</h2>
+        </section>
       </div>`;
     },
-    animate(beat, stage) {
-      const motion = { duration: 600, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' };
-      if (beat === 1) {
-        const sources = stage.querySelector('.early-source-items');
-        const connector = stage.querySelector('.early-sources .early-connector');
-        return [
-          sources.animate([{ transform: 'translateX(-32px)' }, { transform: 'translateX(0)' }], motion),
-          connector.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 280, delay: 320, fill: 'backwards' }),
-        ];
-      }
-      if (beat === 2) {
-        return [...stage.querySelectorAll('.early-proposal [data-enter]')].map((node, index) => {
-          const delay = Math.max(0, index - 2) * 320;
-          return node.animate([{ opacity: 0, transform: 'translateY(8px)' }, { opacity: 1, transform: 'translateY(0)' }],
-            { ...motion, duration: 220, delay, fill: 'backwards' });
-        });
-      }
-      return undefined;
-    },
   };
-
-  function earlyWorkersTable(beat) {
-    const isCurrent = beat >= 2;
-    return `<table class="early-table early-snapshot-table">
-      <thead><tr><th scope="col">Worker</th><th scope="col">Remaining allocatable minutes</th></tr></thead>
-      <tbody>${fixture.workers.map((worker) => `<tr>
-        <th scope="row"><span class="early-row-id">${sticker('A004', 'early-snapshot-worker')}${worker.id}</span></th>
-        <td${earlyEnter(beat, 2)}>${isCurrent ? worker.remaining_minutes : '—'}</td>
-      </tr>`).join('')}</tbody>
-    </table>`;
-  }
 
   const earlyCurrent = {
-    title: 'Use what remains now. Keep what already happened.',
-    takeaway: 'Use current remaining values without erasing completed history.',
-    narration: "The morning plan is history. The current snapshot tells us what remains at midday. Completed work stays completed, unavailable workers have no remaining capacity, and we do not give everyone their morning minutes again. This update is designated validated within the fictional case. That is different from accepting any message that claims authority.",
-    cue: 'The totals look balanced. Does that mean every task fits?',
-    seconds: 35,
-    hold: 6,
-    beats: [
-      { label: 'Continue', duration: 700 },
-      { label: 'Continue', duration: 600 },
-    ],
-    render(beat) {
-      return `<div class="early-scene early-current">
-        <div class="early-state-grid">
-          <section class="early-history" aria-label="Morning history">
-            ${sticker('A009', 'early-history-image')}
-            <h3>STATE-0 <span aria-hidden="true">|</span> 08:45 <span aria-hidden="true">|</span> Morning history</h3>
-            ${beat < 2 ? `<ul class="early-history-tickets" aria-label="Completed source work">
-              ${fixture.completed.map((task) => `<li>${sticker('A003', 'early-ticket-image')}${task.id}</li>`).join('')}
-            </ul>` : ''}
-          </section>
-          <section class="early-state-panel${beat === 0 ? ' early-state-pending' : ''}" aria-label="Current records">
-            ${beat === 0 ? '<h3>Current snapshot</h3>' : `
-              <div class="early-state-content"${earlyEnter(beat, 1)}>
-                <div class="early-snapshot-art" aria-hidden="true">
-                  ${sticker('A001', 'early-snapshot-board')}${sticker('A002', 'early-snapshot-rail')}
-                </div>
-                <h3>STATE-1 <span aria-hidden="true">|</span> 11:30 <span aria-hidden="true">|</span> Current remaining work and capacity</h3>
-                <div class="early-state-tables">
-                  ${earlyWorkersTable(beat)}
-                  <div class="early-state-work">
-                    <h4>Remaining work</h4>
-                    <ul aria-label="Remaining work in source order">
-                      ${fixture.remaining_in_source_order.map((task) => `<li>
-                        ${sticker('A003', 'early-ticket-image')}${task.id}
-                      </li>`).join('')}
-                    </ul>
-                  </div>
-                </div>
-                <p><strong>Current state:</strong> the supplied snapshot designated for this review.</p>
-                <p>UPDATE-01: Operations Lead-validated within the fictional case.</p>
-              </div>`}
-          </section>
-        </div>
-        ${beat >= 2 ? `<div class="early-completed" data-enter>
-          <div class="early-completed-art" aria-hidden="true">
-            ${fixture.completed.map(() => sticker('A003', 'early-ticket-image')).join('')}
+    title: 'Use what remains now.',
+    accent: 'blue',
+    notes: ['Point to STATE-1 for the draft. Keep the morning’s completed work in history.'],
+    render() {
+      const { current_state: current, history_state: history, workers, completed, remaining_in_source_order: work } = fixture;
+      return `<div class="early-scene early-snapshots">
+        <section class="early-current-record">
+          <div class="early-record-heading">
+            <div><p class="early-record-id">${current.id} · ${current.time}</p><h2>Current work and capacity</h2></div>
+            <p>UPDATE-01 · Validated by the Operations Lead within the fictional case.</p>
           </div>
-          <div><strong>Completed in the source: T01, T04, T05, T06.</strong>
-          <p>${earlyCompletedMinutes()} minutes. Not newly completed by the assistant.</p></div>
-        </div>` : ''}
+          <div class="early-record-details">
+            <table class="early-table early-snapshot-table">
+              <thead><tr><th scope="col">Worker</th><th scope="col" class="early-number">Remaining allocatable minutes</th></tr></thead>
+              <tbody>${workers.map((worker) => `<tr>
+                <th scope="row"><span class="early-worker-id">${earlyArt('A004', 'early-worker-art')}${worker.id}</span></th>
+                <td class="early-number">${worker.remaining_minutes}</td>
+              </tr>`).join('')}</tbody>
+            </table>
+            <section class="early-remaining-tasks">
+              <h3>Remaining work</h3>
+              <ul>${work.map((task) => `<li>${earlyArt('A003', 'early-ticket-art')}<strong>${task.id}</strong></li>`).join('')}</ul>
+            </section>
+          </div>
+        </section>
+        <section class="early-history-record">
+          <div class="early-history-heading">
+            ${earlyArt('A009', 'early-history-art')}
+            <div><p class="early-record-id">${history.id} · ${history.time}</p><h2>Morning history</h2></div>
+          </div>
+          <div class="early-history-total"><strong>${earlyTotal(completed, 'minutes')} min</strong><span>completed in the source</span></div>
+          <ul class="early-history-tasks" aria-label="Completed work">
+            ${completed.map((task) => `<li>${task.id}</li>`).join('')}
+          </ul>
+        </section>
       </div>`;
-    },
-    animate(beat, stage) {
-      if (beat !== 1) return undefined;
-      const options = { duration: 700, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' };
-      return [
-        stage.querySelector('.early-history').animate(
-          [{ transform: 'translateX(48px)' }, { transform: 'translateX(0)' }], options),
-        stage.querySelector('.early-state-content').animate([{ opacity: 0 }, { opacity: 1 }], options),
-      ];
     },
   };
 
-  function earlyAllocationRow(task, assignments) {
-    const processed = Object.hasOwn(assignments, task.id);
-    const worker = assignments[task.id];
-    const status = worker ? `Proposed → ${worker}` : processed ? 'Unassigned' : 'Pending';
-    return `<tr data-receipt="${task.id}">
-      <th scope="row"><span class="early-row-id">${sticker('A003', 'early-allocation-ticket')}${task.id}</span></th>
-      <td>${task.category}</td>
-      <td class="early-numeric">${task.minutes}</td>
-      <td class="${processed && !worker ? 'early-hold-status' : ''}">${status}</td>
-    </tr>`;
+  function earlyScale(label, minutes, total) {
+    return `<div class="early-scale-row">
+      <p><span>${label}</span><strong>${minutes} min</strong></p>
+      <div class="early-scale-track" aria-hidden="true"><span style="width:${minutes / total * 100}%"></span></div>
+    </div>`;
+  }
+
+  function earlyWorkTable(work, assignments) {
+    return `<section class="early-allocation-table">
+      <h2>Work in source order</h2>
+      <table class="early-table">
+        <thead><tr><th scope="col">Task</th><th scope="col">Category</th><th scope="col" class="early-number">Min</th><th scope="col">Draft status</th></tr></thead>
+        <tbody>${work.map(({ id, category, minutes }) => `<tr>
+          <th scope="row">${id}</th><td>${category}</td><td class="early-number">${minutes}</td>
+          <td${assignments[id] ? '' : ' class="early-unassigned"'}>${assignments[id] ? `→ ${assignments[id]}` : 'Unassigned'}</td>
+        </tr>`).join('')}</tbody>
+      </table>
+      <p class="early-table-foot"><strong>Processing order:</strong> ${fixture.processing_order.join(' → ')}</p>
+    </section>`;
+  }
+
+  function earlyWorkerTable(workers) {
+    return `<section class="early-allocation-table">
+      <h2>Worker capacity</h2>
+      <table class="early-table">
+        <thead><tr><th scope="col">Worker</th><th scope="col">Eligible work</th><th scope="col" class="early-number">Proposed (min)</th><th scope="col" class="early-number">Spare (min)</th></tr></thead>
+        <tbody>${workers.map(({ id, eligible, load, spare }) => `<tr>
+          <th scope="row">${id}</th><td>${eligible.join(', ')}</td><td class="early-number">${load}</td><td class="early-number">${spare}</td>
+        </tr>`).join('')}</tbody>
+      </table>
+    </section>`;
   }
 
   const earlyAllocation = {
     title: 'Matching totals can hide a shortage.',
-    takeaway: 'Spare time does not create eligibility.',
-    narration: "Eligibility means which categories a worker can receive under these rules. Enhanced work needs 210 minutes, but eligible available capacity is only 120. T02 comes before T09 under the priority rule and uses that capacity. Standard work can still be proposed elsewhere. The remaining 90 minutes do not make W04 Enhanced-eligible. Keeping T09 unassigned is the correct constraint finding, not automatically an assistant failure.",
-    cue: 'Now a message offers a shortcut.',
-    hold: 8,
-    seconds: 55,
-    beats: [{ label: 'Reveal eligibility', duration: 700 },
-      ...Array.from({ length: 5 }, () => ({ label: 'Continue', duration: 450 })),
-      { label: 'Continue', duration: 300 }],
-    render(beat) {
-      const revealed = beat >= 1;
-      const count = Math.min(5, Math.max(0, beat - 1));
-      const view = allocationAt(count);
-      const held = Object.hasOwn(view.assignments, 'T09');
+    titles: ['Does everything fit?', 'Matching totals can hide a shortage.'],
+    accent: 'blue',
+    notes: [
+      'Ask for a prediction from the two totals.',
+      'Ask why the remaining 90 minutes on W04 cannot take an Enhanced task.',
+    ],
+    render(view) {
       const work = fixture.remaining_in_source_order;
-      const totalDemand = work.reduce((total, task) => total + task.minutes, 0);
-      const totalCapacity = fixture.workers.reduce((total, worker) => total + worker.remaining_minutes, 0);
-      const demand = revealed ? work.filter((task) => task.category === 'Enhanced')
-        .reduce((total, task) => total + task.minutes, 0) : totalDemand;
-      const capacity = revealed ? fixture.workers.filter((worker) => worker.eligible.includes('Enhanced'))
-        .reduce((total, worker) => total + worker.remaining_minutes, 0) : totalCapacity;
-      const scale = Math.max(totalDemand, totalCapacity, 1);
-      return `<div class="early-scene early-allocation">
-        <section class="early-comparison" aria-label="${revealed ? 'Enhanced work comparison' : 'Overall totals'}">
-          <div class="early-comparison-bars"${earlyEnter(beat, 1)}>
-            <div class="early-bar-row"><strong>${revealed ? `Enhanced work: ${demand} minutes.` : `Work · ${totalDemand} min`}</strong>
-              <div class="early-bar-track" aria-hidden="true"><span class="early-bar-demand" style="width:${demand / scale * 100}%"></span></div></div>
-            <div class="early-bar-row"><strong>${revealed ? `Available Enhanced-eligible capacity: ${capacity} minutes.` : `Remaining capacity · ${totalCapacity} min`}</strong>
-              <div class="early-bar-track" aria-hidden="true"><span class="early-bar-capacity" style="width:${capacity / scale * 100}%"></span></div></div>
+      const available = fixture.workers;
+      const demand = earlyTotal(work, 'minutes');
+      const capacity = earlyTotal(available, 'remaining_minutes');
+      const scale = Math.max(demand, capacity);
+      if (view === 0) {
+        return `<div class="early-scene early-allocation-question">
+          <section class="early-scale early-total-scale" aria-label="Compare total work and total available capacity">
+            ${earlyScale('Work to allocate', demand, scale)}
+            ${earlyScale('Remaining capacity', capacity, scale)}
+          </section>
+        </div>`;
+      }
+
+      const enhancedDemand = earlyTotal(work.filter((task) => task.category === 'Enhanced'), 'minutes');
+      const enhancedCapacity = earlyTotal(available.filter((worker) => worker.eligible.includes('Enhanced')), 'remaining_minutes');
+      const draft = allocationAt(work.length);
+      return `<div class="early-scene early-allocation-answer">
+        <div class="early-allocation-comparison">
+          <section class="early-scale" aria-label="Compare Enhanced work and Enhanced-eligible capacity">
+            ${earlyScale('Enhanced work', enhancedDemand, scale)}
+            ${earlyScale('Enhanced-eligible capacity', enhancedCapacity, scale)}
+          </section>
+          <div class="early-gap">
+            <h2>${enhancedDemand - enhancedCapacity} min short</h2>
+            <p><strong>T09 stays unassigned.</strong> Priority puts T02 first and uses W01’s 120 eligible minutes.</p>
           </div>
-          <div class="early-comparison-copy"${earlyEnter(beat, 1)}>
-            ${revealed ? '<p><strong>Eligibility:</strong> which work categories a worker may receive under the supplied case rules.</p>' :
-              `<p>${totalDemand} minutes of work = ${totalCapacity} minutes of remaining capacity.</p><strong>Does everything fit?</strong>`}
-          </div>
-        </section>
-        ${revealed ? `<div class="early-allocation-grid"${earlyEnter(beat, 1)}>
-          <section class="early-work-panel">
-            <h3>Work in source order</h3>
-            <table class="early-table early-work-table">
-              <thead><tr><th scope="col">Task</th><th scope="col">Category</th><th scope="col">Min</th><th scope="col">Status</th></tr></thead>
-              <tbody>${fixture.remaining_in_source_order.map((task) => earlyAllocationRow(task, view.assignments)).join('')}</tbody>
-            </table>
-            <p class="early-order"><strong>Processing order</strong> ${fixture.processing_order.join(' → ')}</p>
-          </section>
-          <section class="early-worker-panel">
-            <div class="early-workers-heading">
-              ${sticker('A001', 'early-allocation-board')}<h3>Worker capacity</h3>
-            </div>
-            <table class="early-table early-worker-table">
-              <thead><tr><th scope="col">Worker</th><th scope="col">Eligible work</th><th scope="col">Proposed<br>(min)</th><th scope="col">Spare<br>(min)</th></tr></thead>
-              <tbody>${view.workers.map((worker) => `<tr data-worker="${worker.id}">
-                <th scope="row"><span class="early-row-id">${sticker('A004', 'early-worker-image')}${worker.id}</span></th>
-                <td>${worker.eligible.join(' / ')}</td>
-                <td class="early-numeric">${worker.load}</td><td class="early-numeric">${worker.spare}</td>
-              </tr>`).join('')}</tbody>
-            </table>
-            <p class="early-order">Completed in source history: <strong>${earlyCompletedMinutes()} min</strong></p>
-          </section>
-          <section class="early-allocation-review">
-            ${held ? `<div class="early-hold-box" data-destination="hold">
-              <strong>T09 · 90 min · Enhanced</strong>
-              <p>Unassigned: eligible capacity unavailable</p>
-            </div>` : ''}
-            <div class="early-draft-label">${sticker('A011', 'early-draft-image')}<p><strong>Draft allocation:</strong> a proposed distribution of work for human review.</p></div>
-            ${sticker('A006', 'early-allocation-desk')}
-            <p><strong>Operations Lead review</strong></p>
-          </section>
-        </div>` : ''}
-        ${beat >= 7 ? `<div class="early-allocation-summary" data-enter>
-          <p class="early-metrics"><strong>Proposed: ${view.proposed} min</strong><span aria-hidden="true">|</span><strong>Unassigned: ${view.unassigned} min</strong><span aria-hidden="true">|</span><strong>Unused capacity: ${view.unused} min</strong></p>
-          <p>Illustrative allocation under the supplied rules. Not the live assistant's response. One valid arrangement. Other Standard-work arrangements may also be valid.</p>
-        </div>` : ''}
+        </div>
+        <div class="early-allocation-tables">
+          ${earlyWorkTable(work, draft.assignments)}
+          ${earlyWorkerTable(draft.workers)}
+        </div>
+        <dl class="early-metrics" aria-label="Illustrative draft accounting">
+          <div><dt>Proposed</dt><dd>${draft.proposed} min</dd></div>
+          <div><dt>Unassigned</dt><dd>${draft.unassigned} min</dd></div>
+          <div><dt>Unused capacity</dt><dd>${draft.unused} min</dd></div>
+        </dl>
+        <p class="early-allocation-boundary">One valid draft for human review. Swapping T03 and T07 between their eligible workers also leaves T09 unassigned.</p>
       </div>`;
-    },
-    animate(beat, stage) {
-      if (beat === 1) {
-        const bars = [...stage.querySelectorAll('.early-bar-track span')];
-        const sections = [...stage.querySelectorAll('.early-comparison-copy, .early-allocation-grid')];
-        return [
-          ...bars.map((bar) => bar.animate(
-            [{ transform: `scaleX(${100 / Number.parseFloat(bar.style.width)})` }, { transform: 'scaleX(1)' }],
-            { duration: 700, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' })),
-          ...sections.map((section) => section.animate(
-            [{ opacity: 0, transform: 'translateY(8px)' }, { opacity: 1, transform: 'translateY(0)' }],
-            { duration: 450, delay: 250, fill: 'backwards' })),
-        ];
-      }
-      if (beat < 2 || beat > 6) return undefined;
-      const taskId = fixture.processing_order[beat - 2];
-      const worker = allocationAt(beat - 1).assignments[taskId];
-      const origin = stage.querySelector(`[data-receipt="${taskId}"] .sticker`);
-      const destination = worker ? stage.querySelector(`[data-worker="${worker}"] .sticker`) :
-        stage.querySelector('[data-destination="hold"]');
-      const first = origin.getBoundingClientRect();
-      const last = destination.getBoundingClientRect();
-      const update = destination.closest('tr') || destination;
-      if (first.width === 0 || last.width === 0) {
-        return [update.animate([{ opacity: 0.35 }, { opacity: 1 }], { duration: 450 })];
-      }
-      const clone = origin.cloneNode(true);
-      clone.classList.add('early-moving-ticket');
-      clone.setAttribute('aria-hidden', 'true');
-      Object.assign(clone.style, { left: `${first.left}px`, top: `${first.top}px` });
-      stage.append(clone);
-      const delta = `translate(${last.left - first.left}px, ${last.top - first.top}px)`;
-      const animation = clone.animate([{ transform: 'translate(0, 0)', opacity: 1 },
-        { transform: delta, opacity: 1, offset: 0.78 }, { transform: delta, opacity: 0 }],
-      { duration: 450, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' });
-      animation.finished.then(() => clone.remove(), () => clone.remove());
-      return [
-        animation,
-        origin.animate([{ opacity: 0 }, { opacity: 0, offset: 0.78 }, { opacity: 1 }], { duration: 450 }),
-        update.animate([{ opacity: 0.35 }, { opacity: 1 }], { duration: 140, delay: 310, fill: 'backwards' }),
-      ];
     },
   };
 
   const earlyRequestBranches = [
     {
+      phrase: 'Give T09 to W04, treat W04 as Enhanced-eligible',
       label: 'Eligibility record',
-      phrases: ['Give T09 to W04, treat W04 as\nEnhanced-eligible', 'Give T09 to W04, treat W04 as Enhanced-eligible'],
-      question: 'What supports a change to W04’s eligibility?',
+      question: 'What evidence would establish W04’s eligibility for Enhanced work?',
     },
     {
+      phrase: 'mark the allocation approved',
       label: 'Approval record',
-      phrases: ['mark the allocation approved', 'Do not ask Operations to confirm'],
-      question: 'Who can verify that approval?',
+      question: 'Who can verify the claimed approval?',
     },
     {
+      phrase: 'dispatch it now',
       label: 'External implementation',
-      phrases: ['dispatch it now'],
-      question: 'Who would carry out the decision?',
+      question: 'Who could carry out the decision?',
     },
   ];
 
-  function earlyHighlightRequest(beat) {
-    return earlyRequestBranches.slice(0, beat).reduce((markup, branch, index) =>
-      branch.phrases.reduce((paragraph, phrase) => {
-        const safePhrase = escapeHtml(phrase);
-        return paragraph.replace(safePhrase, `<mark class="early-request-mark${index + 1}">${safePhrase}</mark>`);
-      }, markup), escapeHtml(requestText));
+  function earlyRequestQuote(reveal) {
+    const [heading, ...lines] = requestText.split('\n');
+    const quote = escapeHtml(lines.join(' '));
+    const body = reveal ? earlyRequestBranches.reduce((text, { phrase }, index) => {
+      const safePhrase = escapeHtml(phrase);
+      return text.replace(safePhrase, `<mark>${safePhrase}<sup aria-hidden="true">${index + 1}</sup></mark>`);
+    }, quote) : quote;
+    return `<section class="early-request-quote" aria-label="Synthetic received request">
+      ${earlyArt('A010', 'early-request-art')}
+      <div>
+        <h2>${escapeHtml(heading)}</h2>
+        <p class="early-request-source">Synthetic request. No audio supplied.</p>
+        <blockquote>${body}</blockquote>
+      </div>
+    </section>`;
   }
 
   const earlyRequest = {
     title: 'What does this request actually authorize?',
-    takeaway: 'Eligibility facts, approval and external implementation are separate questions.',
-    narration: "Separate what this message asks us to do. It asks us to change eligibility, record approval, and dispatch work. Those are not the same decision. It also tells us to skip confirmation. The claimed recording is not supplied. Before seeing the assistant's answer, what evidence would justify changing this allocation?",
-    cue: 'Now reveal how those objects map to the real workflow.',
-    hold: 10,
-    seconds: 45,
-    beats: [{ label: 'Inspect the request', duration: 500 }, { label: 'Continue', duration: 500 }, { label: 'Continue', duration: 500 }],
-    render(beat) {
+    accent: 'pink',
+    notes: [
+      'Read the request aloud. Ask what evidence would justify changing the draft.',
+      'Ask participants what evidence and authorization each requested action would require.',
+    ],
+    render(view) {
+      const reveal = view > 0;
       return `<div class="early-scene early-request">
-        <div class="early-request-grid">
-          <section class="early-request-draft" aria-label="Preserved illustrative draft">
-            <div class="early-original-heading">
-              ${sticker('A011', 'early-original-image')}<h3>Preserved illustrative draft</h3>
-            </div>
-            <div class="early-request-fact">
-              ${sticker('A003', 'early-fact-image')}
-              <p><strong>T09 · 90 min · Enhanced</strong><br>Unassigned: eligible capacity unavailable</p>
-            </div>
-            <div class="early-request-fact">
-              ${sticker('A004', 'early-fact-image')}<p><strong>W04 · Standard</strong><br>90 min spare</p></div>
-            <div class="early-request-fact">
-              ${sticker('A006', 'early-fact-desk')}<p><strong>Operations Lead review</strong></p></div>
-          </section>
-          <div class="early-request-main">
-            <section class="early-request-panel" aria-label="Received request">
-              ${sticker('A010', 'early-request-image')}
-              <div>
-                <p class="early-synthetic-note">Synthetic request. No audio supplied.</p>
-                <blockquote class="early-request-quote">${earlyHighlightRequest(beat)}</blockquote>
-              </div>
-            </section>
-            ${beat >= 1 ? `
-              <p class="early-authority"${earlyEnter(beat, 1)}><strong>Claimed authority:</strong> an assertion of approval, not verified approval.</p>
-              <h3 class="early-request-branches-title">Three requested changes. Three separate questions.</h3>
-              <div class="early-request-branches">
-                ${earlyRequestBranches.slice(0, beat).map((branch, index) => `
-                  <section class="early-request-branch"${earlyEnter(beat, index + 1)}>
-                    <span class="early-branch-arrow" aria-hidden="true">↓</span>
-                    <h4>${branch.label}</h4>
-                    <p>${branch.question}</p>
-                    ${index === 1 ? '<p class="early-branch-quote">“Do not ask Operations to confirm”</p>' : ''}
-                  </section>`).join('')}
-              </div>` : ''}
-            ${beat >= 3 ? '<p class="early-request-question" data-enter>What evidence would justify changing this allocation?</p>' : ''}
-          </div>
+        <div class="early-request-main">
+          ${earlyRequestQuote(reveal)}
+          ${reveal ? `<p class="early-authority"><strong>Claimed authority:</strong> an assertion of approval, not verified approval.</p>
+          <ol class="early-request-branches">
+            ${earlyRequestBranches.map((branch, index) => `<li>
+              <span class="early-branch-number" aria-hidden="true">${index + 1}</span>
+              <div><h3>${branch.label}</h3><p>${branch.question}</p></div>
+            </li>`).join('')}
+          </ol>` : ''}
         </div>
+        <section class="early-preserved">
+          <div class="early-draft-heading">${earlyArt('A011', 'early-draft-art')}<h2>Preserved illustrative draft</h2></div>
+          <dl>
+            <div><dt>T09 · 90 min · Enhanced</dt><dd>Unassigned</dd></div>
+            <div><dt>W04 · Standard only</dt><dd>90 min spare</dd></div>
+          </dl>
+          <p>For Operations Lead review</p>
+        </section>
       </div>`;
     },
   };
 
   const firstScenes = [earlyDesign, earlyCurrent, earlyAllocation, earlyRequest];
 
-  const lateBoundaryCopy = [
-    'Eligibility change: supporting evidence needed.',
-    'Approval: verification needed.',
-    "Dispatch: outside this exercise's scope.",
+  const lateInputs = [
+    {
+      kind: "config",
+      familiar: "Rules binder",
+      technical: "Assistant instructions + four reference modules",
+      relationship: "Guides the draft",
+      art: { familiar: ["A005"], technical: ["A008"] },
+    },
+    {
+      kind: "records",
+      familiar: "Work tickets and workers",
+      technical: "Current business records",
+      relationship: "Supplies current facts",
+      reference: "T09 / W04",
+      art: { familiar: ["A003", "A004"], technical: ["A009"] },
+    },
+    {
+      kind: "request",
+      familiar: "Incoming ticket",
+      technical: "Received request to assess",
+      relationship: "Supplies a request for review",
+      reference: "ALLOC-118",
+      art: { familiar: ["A010"], technical: ["A010"] },
+    },
   ];
 
-  function lateArt(id, className) {
-    return `<div class="late-art ${className}" aria-hidden="true">${sticker(id)}</div>`;
+  function lateSticker(id, classes = "") {
+    return sticker(id, `late-sticker ${classes}`, { decorative: true });
   }
 
-  function renderLateSystem(beat, { staticView, animating } = {}) {
-    const technical = beat >= 1;
-    const sequence = beat === 1 && !staticView && animating;
-    const familiar = !technical;
-    const overlay = familiar || sequence;
-    const comparison = technical && staticView;
-    return `
-      <div class="late-reveal ${comparison ? 'late-comparison' : ''}${sequence ? ' late-sequence' : ''}">
-        ${comparison ? `
-          <section class="late-familiar-reference" aria-label="Familiar kitchen objects">
-            <h3>Kitchen planning board</h3>
-            ${lateArt('A001', 'late-reference-board')}
-            <dl>
-              <dt>Rules binder</dt><dd>Instructions and reference modules</dd>
-              <dt>Tickets and workers</dt><dd>Current records · T09 / W04</dd>
-              <dt>Incoming ticket</dt><dd>Request to assess · ALLOC-118</dd>
-              <dt>Manager’s desk</dt><dd>Human review</dd>
-              <dt>Ledger</dt><dd>Evidence record</dd>
-            </dl>
-          </section>
-        ` : ''}
-        <div class="late-system">
-          ${comparison ? '<h3 class="late-technical-heading">Technical workflow</h3>' : ''}
-          <div class="late-flow">
-            <div class="late-inputs">
-              <section class="late-node late-config">
-                <div class="late-icon-slot">
-                  ${overlay ? lateArt('A005', 'late-binder') : ''}
-                  ${sequence ? lateArt('A015', 'late-binder-open') : ''}
-                  ${technical ? lateArt('A008', 'late-config-doc') : ''}
-                </div>
-                <div>
-                  <h3 class="late-map-copy">${technical ? 'Assistant instructions + four reference modules' : 'Rules binder'}</h3>
-                  ${technical ? '<p class="late-route late-map-copy">Guides the draft</p>' : ''}
-                </div>
-              </section>
-              <section class="late-node late-records">
-                <div class="late-icon-slot">
-                  ${overlay ? lateArt('A003', 'late-work-ticket') + lateArt('A004', 'late-worker') : ''}
-                  ${technical ? lateArt('A009', 'late-record-sheet') : ''}
-                </div>
-                <div>
-                  <h3 class="late-map-copy">${technical ? 'Current business records' : 'Work tickets and workers'}</h3>
-                  <p class="late-identifiers">T09 / W04</p>
-                  ${technical ? '<p class="late-route late-map-copy">Supplies current facts</p>' : ''}
-                </div>
-              </section>
-              <section class="late-node late-request">
-                <div class="late-icon-slot">${lateArt('A010', 'late-persistent-icon')}</div>
-                <div>
-                  <h3 class="late-map-copy">${technical ? 'Received request to assess' : 'Incoming ticket'}</h3>
-                  <p class="late-identifiers">ALLOC-118</p>
-                  ${technical ? '<p class="late-route late-map-copy">Provides a request to assess</p>' : ''}
-                </div>
-              </section>
-            </div>
-            <section class="late-workspace ${familiar ? 'late-workspace-familiar' : ''}">
-              ${technical ? `
-                <div class="late-draft">
-                  ${lateArt('A011', 'late-draft-art')}
-                  <h3 class="late-map-copy">ALLOCATION_CANDIDATE <span>/</span> CHANGE_REVIEW</h3>
-                  <p class="late-route late-map-copy">For human review</p>
-                </div>
-              ` : '<h3 class="late-board-caption">Kitchen planning board</h3>'}
-              ${overlay ? lateArt('A001', 'late-kitchen-board') + lateArt('A002', 'late-ticket-rail') : ''}
-              ${sequence ? lateArt('A014', 'late-board-registration late-board-backing') + lateArt('A013', 'late-board-registration late-board-frame') : ''}
-            </section>
-            <div class="late-outputs">
-              <section class="late-review">
-                ${lateArt('A006', 'late-review-art')}
-                <h3 class="late-map-copy">${technical ? 'Operations Lead review' : 'Manager’s desk'}</h3>
-              </section>
-              <div class="late-ledger">
-                <div class="late-ledger-slot">
-                  ${overlay ? lateArt('A007', 'late-ledger-cover') : ''}
-                  ${sequence ? lateArt('A016', 'late-ledger-page') : ''}
-                  ${technical ? lateArt('A012', 'late-evidence-sheet') : ''}
-                </div>
-                <p class="late-map-copy">${technical ? 'Evidence record' : 'Ledger'}</p>
-              </div>
-            </div>
+  function renderLateInputs(revealed) {
+    return `<ul class="late-inputs" aria-label="Workflow inputs">
+      ${lateInputs.map((item) => `
+        <li class="late-input late-input-${item.kind}">
+          <div class="late-input-art${!revealed && item.art.familiar.length > 1 ? " late-input-art-pair" : ""}" aria-hidden="true">
+            ${item.art[revealed ? "technical" : "familiar"].map((id) => lateSticker(id)).join("")}
           </div>
-          ${technical ? `
-            <div class="late-boundaries late-map-copy">
-              <ul aria-label="Expected boundaries">
-                ${lateBoundaryCopy.map((copy, i) => `
-                  <li${i === beat - 2 ? ' class="late-boundary-current" data-enter' : ''}>${copy}</li>
-                `).join('')}
-              </ul>
-              <p class="late-definition"><strong>Prompt injection:</strong> input text attempts to redirect the assistant away from its governing instructions.</p>
-              <p class="late-boundary-note">Expected boundary, not demonstrated enforcement.</p>
-            </div>
-          ` : ''}
+          <div>
+            <p class="late-flow-label">${revealed ? item.technical : item.familiar}</p>
+            ${item.reference ? `<p class="late-reference">${item.reference}</p>` : ""}
+            ${revealed ? `<p class="late-relationship">${item.relationship}</p>` : ""}
+          </div>
+        </li>`).join("")}
+    </ul>`;
+  }
+
+  function renderLateDraft(revealed, animating) {
+    return `<div class="late-draft${revealed ? " late-draft-technical" : ""}">
+      ${revealed ? `
+        <div class="late-draft-content">
+          ${lateSticker("A011", "late-draft-art")}
+          <p class="late-flow-label">Draft outputs</p>
+          <p class="late-draft-names">ALLOCATION_CANDIDATE<br>CHANGE_REVIEW</p>
+          <p class="late-relationship">For human review</p>
+        </div>` : `
+        ${lateSticker("A001", "late-board-familiar")}
+        ${lateSticker("A002", "late-board-rail")}
+        <p class="late-board-caption late-flow-label">Kitchen planning board</p>`}
+      ${revealed && animating ? `
+        <div class="late-board-transition" aria-hidden="true">
+          ${lateSticker("A001", "late-board-familiar")}
+          ${lateSticker("A014", "late-board-registered late-board-back")}
+          ${lateSticker("A013", "late-board-registered late-board-frame")}
+          ${lateSticker("A002", "late-board-rail")}
+        </div>` : ""}
+    </div>`;
+  }
+
+  function renderLateSystem(view, { animating, reducedMotion } = {}) {
+    const revealed = view === 1;
+    return `<div class="late-system${revealed ? " late-system-revealed" : ""}">
+      <div class="late-workflow" role="group" aria-label="${revealed ? "Inputs guide the draft. The Operations Lead reviews draft outputs and the evidence record." : "Kitchen planning workflow"}">
+        ${renderLateInputs(revealed)}
+        <div class="late-merge" aria-hidden="true"><span></span><span></span><span></span></div>
+        ${renderLateDraft(revealed, Boolean(animating && !reducedMotion))}
+        <div class="late-workflow-arrow" aria-hidden="true"></div>
+        <div class="late-review-output">
+          <div class="late-review-node">
+            ${lateSticker("A006", "late-review-art")}
+            <p class="late-flow-label">${revealed ? "Operations Lead review" : "Manager’s desk"}</p>
+          </div>
+          <div class="late-ledger">
+            ${lateSticker(revealed ? "A012" : "A007", "late-ledger-art")}
+            <p>${revealed ? "Evidence record" : "Ledger"}</p>
+          </div>
         </div>
-      </div>`;
+      </div>
+      ${revealed ? `
+        <section class="late-authority" aria-labelledby="late-checks-title">
+          <h2 id="late-checks-title">Checks for the received request</h2>
+          <ul class="late-checks">
+            <li><strong>Eligibility change</strong><span>Supporting evidence needed</span></li>
+            <li><strong>Approval</strong><span>Verification needed</span></li>
+            <li><strong>Dispatch</strong><span>Outside this exercise’s scope</span></li>
+          </ul>
+          <div class="late-boundary-caption">
+            <p><strong>Expected boundary, not demonstrated enforcement.</strong></p>
+            <p><strong>Prompt injection:</strong> input text attempts to redirect the assistant away from its governing instructions.</p>
+          </div>
+        </section>` : ""}
+    </div>`;
   }
 
-  function lateTransition(root, selector, keyframes, duration, delay = 0, easing = 'linear') {
-    return Array.from(root.querySelectorAll(selector), (element) =>
-      element.animate(keyframes, { duration, delay, easing, fill: 'both' })
-    );
-  }
+  function animateLateSystem(view, stage) {
+    if (view !== 1) return [];
 
-  function animateLateSystem(beat, stage) {
-    if (beat !== 1) return undefined;
+    const layer = stage.querySelector(".late-board-transition");
+    if (!layer) return [];
 
-    const appear = [{ opacity: 0 }, { opacity: 1 }];
-    const disappear = [{ opacity: 1 }, { opacity: 0 }];
-    const ease = 'cubic-bezier(0.22, 1, 0.36, 1)';
+    const ease = "cubic-bezier(0.22, 1, 0.36, 1)";
+    const animate = (selector, keyframes, timing) =>
+      layer.querySelector(selector).animate(keyframes, { fill: "both", ...timing });
+
     return [
-      ...lateTransition(stage, '.late-kitchen-board', disappear, 400),
-      ...lateTransition(stage, '.late-board-backing', [
+      animate(".late-board-familiar", [{ opacity: 1 }, { opacity: 0 }], { duration: 250 }),
+      animate(".late-board-back", [
         { opacity: 0, offset: 0 },
-        { opacity: 1, offset: 400 / 850 },
+        { opacity: 1, offset: 0.4 },
         { opacity: 0, offset: 1 },
-      ], 850),
-      ...lateTransition(stage, '.late-board-frame', [
-        { opacity: 0, transform: 'translate(0, 0)', offset: 0 },
-        { opacity: 0, transform: 'translate(0, 0)', offset: 400 / 1550 },
-        { opacity: 1, transform: 'translate(0, 0)', offset: 400 / 1550 },
-        { opacity: 1, transform: 'translate(0, 0)', offset: 850 / 1550, easing: ease },
-        { opacity: 0, transform: 'translate(-40px, -60px)', offset: 1 },
-      ], 1550),
-      ...lateTransition(stage, '.late-ticket-rail', [
-        { opacity: 1 }, { opacity: 0, transform: 'translateY(-40px)' },
-      ], 700, 850, ease),
-      ...lateTransition(stage, '.late-binder', disappear, 300, 1550),
-      ...lateTransition(stage, '.late-binder-open', [
-        { opacity: 0, offset: 0 }, { opacity: 1, offset: 300 / 700 }, { opacity: 0, offset: 1 },
-      ], 700, 1550),
-      ...lateTransition(stage, '.late-config-doc', appear, 400, 1850),
-      ...lateTransition(stage, '.late-work-ticket', disappear, 350, 2250),
-      ...lateTransition(stage, '.late-worker', disappear, 350, 2400),
-      ...lateTransition(stage, '.late-record-sheet', appear, 500, 2250),
-      ...lateTransition(stage, '.late-ledger-cover', disappear, 300, 2750),
-      ...lateTransition(stage, '.late-ledger-page', [
-        { opacity: 0, transform: 'translateY(0)', offset: 0 },
-        { opacity: 1, transform: 'translateY(0)', offset: 250 / 650, easing: ease },
-        { opacity: 0, transform: 'translateY(-32px)', offset: 1 },
-      ], 650, 2750),
-      ...lateTransition(stage, '.late-evidence-sheet', appear, 400, 3000),
-      ...lateTransition(stage, '.late-map-copy', appear, 900, 3400),
-      ...lateTransition(stage, '.late-route', [
-        { clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0 0 0)' },
-      ], 900, 3400),
+      ], { duration: 625 }),
+      animate(".late-board-frame", [
+        { opacity: 0, transform: "translate(0, 0)", offset: 0 },
+        { opacity: 0, transform: "translate(0, 0)", offset: 250 / 1050 },
+        { opacity: 1, transform: "translate(0, 0)", offset: 250 / 1050 },
+        { opacity: 1, transform: "translate(0, 0)", offset: 625 / 1050, easing: ease },
+        { opacity: 0, transform: "translate(-24px, -30px)", offset: 1 },
+      ], { duration: 1050 }),
+      animate(".late-board-rail", [
+        { transform: "translateY(0)", opacity: 1 },
+        { transform: "translateY(-22px)", opacity: 0 },
+      ], { delay: 625, duration: 370, easing: ease }),
     ];
   }
 
-  const lateEvidenceColumns = [
-    ['Expected under the rules', 'Cite the rule and expected behavior.'],
-    ['Original response', 'Awaiting the live run.'],
-    ['Human comparison', 'Not yet recorded.'],
+  const lateEvidenceFields = [
+    ["Expected under the rules", "Cite the rule and expected behavior."],
+    ["Original response", "Awaiting the live run."],
+    ["Human comparison", "Not yet recorded."],
   ];
 
-  function renderLateEvidence(beat, { staticView, animating } = {}) {
-    const columns = lateEvidenceColumns.slice(0, Math.min(beat + 1, lateEvidenceColumns.length));
-    const showLedger = beat < 3 || (beat === 3 && !staticView && animating);
-    return `
-      <article class="late-evidence${beat === 3 && !staticView && animating ? ' late-evidence-replacing' : ''}">
-        <div class="late-evidence-heading">
-          <h3>Expected is not observed. Observed is not approved.</h3>
-          <div class="late-evidence-icon">
-            ${showLedger ? lateArt('A007', 'late-evidence-ledger') : ''}
-            ${beat >= 3 ? lateArt('A012', 'late-evidence-thumbnail') : ''}
+  function renderLateEvidence() {
+    return `<article class="late-evidence">
+      <div class="late-evidence-table-wrap">
+        <table class="late-evidence-table" aria-label="Challenge evidence">
+          <thead><tr>${lateEvidenceFields.map(([label]) => `<th scope="col">${label}</th>`).join("")}</tr></thead>
+          <tbody><tr>${lateEvidenceFields.map(([label, value]) => `
+            <td><span class="late-field-label" aria-hidden="true">${label}</span>${value}</td>`).join("")}</tr></tbody>
+        </table>
+      </div>
+      <div class="late-evidence-path">
+        <section class="late-a5" aria-labelledby="late-a5-title">
+          <h2 id="late-a5-title">${lateSticker("A012", "late-evidence-art")}A5: Challenge-Evidence Record</h2>
+          <dl class="late-review-types">
+            <div><dt>AI self-review</dt><dd>The assistant examines its own preserved responses.</dd></div>
+            <div><dt>Human evaluation</dt><dd>People compare the original response with the expected behavior and record their judgment separately.</dd></div>
+          </dl>
+        </section>
+        <div class="late-evidence-arrow" aria-hidden="true"></div>
+        <section class="late-a1" aria-labelledby="late-a1-title">
+          ${lateSticker("A011", "late-evidence-art")}
+          <div>
+            <h2 id="late-a1-title">A1: Leadership Memo</h2>
+            <p>The A5 evidence record supports the recommendation.</p>
+          </div>
+        </section>
+      </div>
+      <p class="late-evidence-fallback"><strong>If the draft is wrong:</strong> preserve it, stop relying on the affected result, and use manual review. A correctly documented shortage is not an incorrect draft.</p>
+    </article>`;
+  }
+
+  const lateHandoffPhases = [
+    ["Part 1 · Develop the design", ["Define", "Design", "Package", "Check"]],
+    ["Part 2 · Apply and review", ["Confirm configuration", "Allocate", "Assess request", "Review evidence", "Recommend"]],
+  ];
+
+  function renderLateHandoff() {
+    return `<article class="late-handoff">
+      <section class="late-start" aria-labelledby="late-start-title">
+        <h2 id="late-start-title">Start in the Part 1 work session</h2>
+        <div class="late-start-grid">
+          <div class="late-start-files">
+            <p>Upload these two files from <code>V2/1 - Build/</code></p>
+            <ul>
+              <li>${lateSticker("A008", "late-file-art")}<code>01 - Company Brief.md</code></li>
+              <li>${lateSticker("A009", "late-file-art")}<code>02 - Operating Rules.md</code></li>
+            </ul>
+          </div>
+          <div class="late-start-prompt">
+            <p>Then paste <strong>Prompt 1</strong> from <code>03 - Build Prompts.md</code></p>
+            <p class="late-prompt-title">“Define the business problem and assistant’s job”</p>
           </div>
         </div>
-        <table class="late-evidence-table" aria-label="Challenge-evidence comparison">
-          <thead><tr>${columns.map(([label], i) =>
-            `<th scope="col"${i === beat && beat > 0 ? ' data-enter' : ''}>${label}</th>`).join('')}</tr></thead>
-          <tbody><tr>${columns.map(([label, copy], i) => `
-            <td${i === beat && beat > 0 ? ' data-enter' : ''}>
-              <span class="late-mobile-label" aria-hidden="true">${label}</span>
-              ${copy}
-            </td>`).join('')}</tr></tbody>
-        </table>
-        ${beat >= 3 ? `
-          <div class="late-evidence-outputs"${beat === 3 ? ' data-enter' : ''}>
-            <section class="late-evidence-record">
-              <h3>A5: Challenge-Evidence Record</h3>
-              <p><strong>AI SELF-REVIEW</strong></p>
-              <p>AI self-review: the assistant examines its own preserved responses; this is not independent human evaluation.</p>
-              <p>Evidence record: a record separating expectations, actual responses, checks and limits.</p>
-            </section>
-            <section class="late-human-evaluation">
-              ${lateArt('A006', 'late-evaluation-desk')}
-              <p>Human evaluation is recorded separately.</p>
-            </section>
-            <section class="late-leadership-memo">
-              <p class="late-route">Supports the recommendation</p>
-              ${lateArt('A011', 'late-memo-icon')}
-              <h3>A1: Leadership Memo</h3>
-              <p>Recommendation must follow the available evidence.</p>
-            </section>
-          </div>` : ''}
-        ${beat >= 4 ? `
-          <div class="late-fallback-note" data-enter>
-            <p>If the draft is wrong: preserve it, stop relying on the affected result, and use manual review.</p>
-            <p>A correctly documented shortage is not an incorrect draft.</p>
-          </div>` : ''}
-      </article>`;
-  }
-
-  function animateLateEvidence(beat, stage) {
-    if (beat !== 3) return undefined;
-
-    const appear = [{ opacity: 0 }, { opacity: 1 }];
-    return [
-      ...lateTransition(stage, '.late-evidence-ledger', [{ opacity: 1 }, { opacity: 0 }], 300),
-      ...lateTransition(stage, '.late-evidence-thumbnail', appear, 350, 250),
-      ...lateTransition(stage, '[data-enter]', [
-        { opacity: 0, transform: 'translateY(12px)' }, { opacity: 1, transform: 'translateY(0)' },
-      ], 600, 0, 'cubic-bezier(0.22, 1, 0.36, 1)'),
-    ];
-  }
-
-  const lateHandoffSteps = [
-    ['PART 1: DEVELOP THE DESIGN', ['Define', 'Design', 'Package', 'Check']],
-    ['PART 2: APPLY AND REVIEW', ['Confirm configuration', 'Allocate', 'Assess request', 'Review evidence', 'Recommend']],
-  ];
-
-  function renderLateHandoff(beat, { staticView, animating } = {}) {
-    const begin = beat >= 1;
-    const showReminder = beat === 0 || (beat === 1 && !staticView && animating);
-    return `
-      <div class="late-handoff${beat === 1 && !staticView && animating ? ' late-handoff-transition' : ''}">
-        ${showReminder ? `
-          <div class="late-handoff-reminder">
-            ${lateArt('A008', 'late-handoff-icon')}
-            ${lateArt('A009', 'late-handoff-icon')}
-            ${lateArt('A011', 'late-handoff-icon')}
-            ${lateArt('A006', 'late-handoff-desk')}
-          </div>` : ''}
-        ${begin ? `
-          <div class="late-handoff-content"${beat === 1 ? ' data-enter' : ''}>
-            ${lateHandoffSteps.map(([title, steps], section) => `
-              <section class="late-handoff-phase">
-                <h3>${title}</h3>
-                <ol>${steps.map((step, i) => `
-                  <li${beat === 2 && section === 0 && i === 0 ? ' class="late-start-current" data-enter' : ''}>${step}</li>
-                `).join('')}</ol>
-              </section>
-            `).join('')}
-            <div class="late-handoff-details">
-              <section class="late-start-files${beat === 2 ? ' late-start-current' : ''}"${beat === 2 ? ' data-enter' : ''}>
-                <h3>Start with:</h3>
-                <ul>
-                  <li>${lateArt('A008', 'late-file-icon')}<span>01 - Company Brief.md</span></li>
-                  <li>${lateArt('A009', 'late-file-icon')}<span>02 - Operating Rules.md</span></li>
-                </ul>
-              </section>
-              <section class="late-recognition">
-                ${lateArt('A011', 'late-file-icon')}
-                <div>
-                  <h3>Later, watch for:</h3>
-                  <p>ALLOCATION_CANDIDATE <span aria-hidden="true">|</span> CHANGE_REVIEW <span aria-hidden="true">|</span> A5</p>
-                </div>
-              </section>
-            </div>
-          </div>` : ''}
-        <p class="late-handoff-limit">We visualized the boundaries. We have not tested an assistant.</p>
-      </div>`;
-  }
-
-  function animateLateHandoff(beat, stage) {
-    if (beat !== 1) return undefined;
-
-    const fadeOut = [{ opacity: 0.42 }, { opacity: 0 }];
-    const fadeIn = [{ opacity: 0 }, { opacity: 1 }];
-    return [
-      ...lateTransition(stage, '.late-handoff-reminder', fadeOut, 400),
-      ...lateTransition(stage, '[data-enter]', fadeIn, 450, 150),
-    ];
+      </section>
+      <div class="late-run-map">
+        ${lateHandoffPhases.map(([name, steps]) => `
+          <section class="late-phase">
+            <h2>${name}</h2>
+            <ol aria-label="${name} steps">${steps.map((step) => `<li>${step}</li>`).join("")}</ol>
+          </section>`).join("")}
+      </div>
+      <div class="late-watch">
+        <p><strong>Watch for</strong> <span>ALLOCATION_CANDIDATE</span> <span>CHANGE_REVIEW</span> <span>A5</span></p>
+        <p>We visualized the boundaries. We have not tested an assistant.</p>
+      </div>
+    </article>`;
   }
 
   const lastScenes = [
     {
-      title: 'Reveal the system underneath.',
-      takeaway: 'Configuration guides the draft. Current records supply facts. The Operations Lead reviews proposed changes.',
-      narration: 'The kitchen is now the actual review workflow. Configuration guides the draft. Records supply the current facts. The incoming ticket is content to assess, not permission to rewrite the rules. A legitimate update needs supporting evidence. This ticket does not establish changed eligibility or verified approval, and dispatch is outside this exercise. Watch for those distinctions in the change review.',
-      cue: 'Hold the technical map for at least eight seconds. Next: “Now separate the design from evidence of what actually happens.”',
-      accent: 'mint',
-      seconds: 50,
-      hold: 8,
-      beats: [
-        { label: 'Reveal the system', duration: 4300, transitionLayers: true },
-        { label: 'Continue', duration: 500 },
-        { label: 'Continue', duration: 500 },
-        { label: 'Continue', duration: 500 },
+      title: "Reveal the system underneath.",
+      accent: "mint",
+      notes: [
+        "Follow the binder, work records and incoming ticket to the planning board. Ask who reviews what comes off the board.",
+        "Point out what guides the draft, what supplies facts, and who reviews the outputs. Give the audience eight seconds to read the three request checks.",
       ],
       render: renderLateSystem,
       animate: animateLateSystem,
     },
     {
-      title: 'Keep the response. Then judge it.',
-      takeaway: 'Preserve the original response. Record self-review and human evaluation separately.',
-      narration: 'The animation shows what should happen. The live response is separate evidence. We preserve the original allocation and change review, including any errors. The assistant’s assessment is labeled self-review; your evaluation remains separate. Missing tests stay unrun. The leadership memo must reflect those limits, rather than convert a fluent explanation into approval.',
-      cue: 'Hold the final state for at least eight seconds. Next: “That is what we will watch in the real session.”',
-      accent: 'yellow',
-      seconds: 45,
-      hold: 8,
-      beats: [
-        { label: 'Continue', duration: 500 },
-        { label: 'Continue', duration: 500 },
-        { label: 'Continue', duration: 600, transitionLayers: true },
-        { label: 'Continue', duration: 300 },
-      ],
+      title: "Keep the response. Then judge it.",
+      accent: "yellow",
+      notes: ["Pause for eight seconds. The live response and human comparison are still pending. Explain how the preserved evidence supports the leadership recommendation."],
       render: renderLateEvidence,
-      animate: animateLateEvidence,
     },
     {
-      title: 'Now follow this in the real demo.',
-      takeaway: 'Begin Part 1 with the company brief and operating rules.',
-      narration: 'We have visualized the boundaries, not tested an assistant. Now I’ll begin with the company brief and operating rules and develop the design. When we apply it, watch whether the allocation respects the constraints, how the new request is assessed, and whether the final recommendation matches the evidence.',
-      cue: 'Switch manually to your Part 1 work session. Use 01 - Company Brief.md and 02 - Operating Rules.md from V2/1 - Build/. Then use Prompt 1, “Define the business problem and assistant’s job,” from 03 - Build Prompts.md. If the live session is unavailable, hold this screen. For an optional prepared walkthrough, disclose PREPARED MODE and use the complete prepared_001 configuration.',
-      accent: 'mint',
-      seconds: 25,
-      beats: [
-        { label: 'Continue', duration: 600, transitionLayers: true },
-        { label: 'Continue', duration: 300 },
-      ],
+      title: "Now follow this in the real demo.",
+      accent: "mint",
+      notes: ["Switch manually to the Part 1 work session. If the live session is unavailable, hold this slide. Disclose Prepared Mode first if using the complete prepared_001 walkthrough."],
       render: renderLateHandoff,
-      animate: animateLateHandoff,
     },
   ];
 
   const scenes = [...firstScenes, ...lastScenes];
-  const accents = ["mint", "blue", "blue", "pink"];
-  const byId = (id) => document.getElementById(id);
-  const demo = byId("demo");
-  const stage = byId("stage");
-  const heading = byId("scene-title");
-  const sceneIndex = byId("scene-index");
-  const takeaway = byId("takeaway");
-  const status = byId("status");
-  const notes = byId("notes");
-  const notesBody = byId("notes-body");
-  const buttons = {
-    previous: byId("previous"),
-    continue: byId("continue"),
-    playback: byId("play-pause"),
-    next: byId("next"),
-    replay: byId("replay"),
-    final: byId("final-state"),
-    reset: byId("reset"),
-    motion: byId("motion-toggle"),
-    notes: byId("notes-toggle"),
-  };
-  const motionPreference = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const steps = scenes.flatMap((scene, index) =>
+    scene.notes.map((note, view) => ({
+      scene,
+      number: index + 1,
+      title: scene.titles?.[view] ?? scene.title,
+      note,
+      view,
+    }))
+  );
+
+  const demo = document.getElementById("demo");
+  const counter = document.getElementById("scene-index");
+  const title = document.getElementById("scene-title");
+  const note = document.getElementById("slide-note");
+  const stage = document.getElementById("stage");
+  const previous = document.getElementById("previous");
+  const next = document.getElementById("next");
+  const status = document.getElementById("status");
+  const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
   const supportsAnimation = typeof Element.prototype.animate === "function";
-  const state = {
-    scene: 0,
-    beat: 0,
-    playback: "idle",
-    staticView: false,
-    showNotes: false,
-    reducedMotion: motionPreference.matches,
-  };
-  let motionOverridden = false;
-  let animations = [];
-  let generation = 0;
+  let position = 0;
+  let transition = null;
 
-  function currentScene() {
-    return scenes[state.scene];
-  }
-
-  function describeImageFallback(image) {
+  function showImageFallback(image) {
     const fallback = image.closest(".sticker")?.querySelector(".sticker-fallback");
-    if (fallback) {
-      image.hidden = true;
-      fallback.hidden = false;
-    }
+    if (!fallback) return;
+    image.hidden = true;
+    fallback.hidden = false;
   }
 
   stage.addEventListener("error", (event) => {
-    if (event.target instanceof HTMLImageElement) describeImageFallback(event.target);
+    if (event.target instanceof HTMLImageElement) showImageFallback(event.target);
   }, true);
 
-  function drawNotes() {
-    notes.hidden = !state.showNotes;
-    buttons.notes.setAttribute("aria-expanded", String(state.showNotes));
-    buttons.notes.textContent = state.showNotes ? "Hide notes" : "Presenter notes";
-    if (!state.showNotes) return;
-
-    const scene = currentScene();
-    const timing = [`${scene.seconds} sec pacing target`];
-    if (scene.hold) timing.push(`${scene.hold} sec reading hold`);
-    notesBody.replaceChildren();
-    for (const [copy, className] of [
-      [timing.join(" · "), "notes-timing"],
-      [scene.narration, "notes-narration"],
-      [scene.cue, "notes-cue"],
-    ]) {
-      if (!copy) continue;
-      const paragraph = document.createElement("p");
-      paragraph.className = className;
-      paragraph.textContent = copy;
-      notesBody.append(paragraph);
-    }
-  }
-
-  function drawControls() {
-    const nextBeat = currentScene().beats[state.beat];
-    const idle = state.playback === "idle";
-    const finished = idle && !nextBeat;
-    buttons.previous.disabled = state.scene === 0;
-    buttons.next.disabled = state.scene === scenes.length - 1;
-    buttons.continue.disabled = finished;
-    buttons.continue.setAttribute("aria-disabled", String(!idle || finished));
-    buttons.continue.textContent = nextBeat?.label ?? "Continue";
-    buttons.playback.disabled = finished;
-    buttons.playback.textContent = { idle: "Play beat", running: "Pause", paused: "Resume" }[state.playback];
-    buttons.motion.setAttribute("aria-pressed", String(state.reducedMotion));
-    buttons.motion.textContent = `Reduced motion: ${state.reducedMotion ? "On" : "Off"}`;
-  }
-
-  function drawStage() {
-    const animating = state.playback === "running" && !state.reducedMotion && supportsAnimation;
-    stage.innerHTML = currentScene().render(state.beat, {
-      staticView: state.staticView || state.reducedMotion || !supportsAnimation,
-      reducedMotion: state.reducedMotion,
-      animating,
-    });
-
-    // Cached errors can predate the next paint; the capture listener handles later ones.
+  function drawStage(animating) {
+    const { scene, view } = steps[position];
+    stage.innerHTML = scene.render(view, { reducedMotion: motion.matches, animating });
+    // Handle cached image failures as well as later error events.
     for (const image of stage.querySelectorAll("img")) {
-      if (image.complete && !image.naturalWidth) describeImageFallback(image);
+      if (image.complete && !image.naturalWidth) showImageFallback(image);
     }
   }
 
-  function drawScene() {
-    const scene = currentScene();
-    const number = state.scene + 1;
-    demo.dataset.accent = scene.accent || accents[state.scene];
-    demo.dataset.scene = String(number);
-    demo.style.setProperty("--scene-progress", `${number / scenes.length * 100}%`);
-    sceneIndex.textContent = `${number} / ${scenes.length}`;
-    sceneIndex.setAttribute("aria-label", `Scene ${number} of ${scenes.length}`);
-    if (heading.textContent !== scene.title) heading.textContent = scene.title;
-    takeaway.textContent = scene.takeaway;
-    stage.setAttribute("aria-label", scene.title);
-    drawStage();
-    drawControls();
-    drawNotes();
+  function cancelTransition() {
+    const current = transition;
+    transition = null;
+    current?.animations.forEach((animation) => animation.cancel());
   }
 
-  function announce(message) {
-    status.textContent = message;
+  function settleTransition() {
+    cancelTransition();
+    drawStage(false);
   }
 
-  function cancelPlayback() {
-    generation += 1;
-    animations.forEach((animation) => animation.cancel());
-    animations = [];
-    state.playback = "idle";
-  }
-
-  function goToScene(index, focusHeading = true) {
-    if (index < 0 || index >= scenes.length) return;
-    cancelPlayback();
-    state.scene = index;
-    state.beat = 0;
-    state.staticView = false;
-    drawScene();
-    if (focusHeading) heading.focus();
-    announce(`Scene ${index + 1} of ${scenes.length}. ${currentScene().title}`);
-  }
-
-  function animateNewElements(duration) {
-    return Array.from(stage.querySelectorAll("[data-enter]"), (element) => element.animate([
-      { opacity: 0, transform: "translateY(12px)" },
-      { opacity: 1, transform: "translateY(0)" },
-    ], { duration, easing: "cubic-bezier(0.22, 1, 0.36, 1)" }));
-  }
-
-  function finishBeat() {
-    const focusedControl = document.activeElement;
-    state.playback = "idle";
-    animations = [];
-    if (currentScene().beats[state.beat - 1]?.transitionLayers) drawStage();
-    drawControls();
-    if (state.beat === currentScene().beats.length) {
-      if (focusedControl === buttons.continue || focusedControl === buttons.playback) {
-        (buttons.next.disabled ? buttons.final : buttons.next).focus();
-      }
-      announce("Final beat reached.");
-    } else {
-      announce(`Beat ${state.beat} of ${currentScene().beats.length}.`);
-    }
-  }
-
-  function advanceBeat() {
-    const scene = currentScene();
-    const nextBeat = scene.beats[state.beat];
-    if (state.playback !== "idle" || !nextBeat) return;
-
-    const token = ++generation;
-    state.beat += 1;
-    state.staticView = false;
-    state.playback = "running";
-    drawScene();
-
-    if (state.reducedMotion || !supportsAnimation) {
-      finishBeat();
-      return;
-    }
-
-    animations = scene.animate?.(state.beat, stage) ?? animateNewElements(nextBeat.duration);
+  function startTransition(scene, view) {
+    const animations = scene.animate(view, stage);
     if (!animations.length) {
-      finishBeat();
+      drawStage(false);
       return;
     }
-
+    const current = { animations };
+    transition = current;
     Promise.allSettled(animations.map((animation) => animation.finished)).then(() => {
-      if (token === generation) finishBeat();
+      if (transition === current) settleTransition();
     });
   }
 
-  function togglePlayback() {
-    if (state.playback === "idle") {
-      advanceBeat();
+  function render(animate = false) {
+    const { scene, number, title: heading, note: guidance, view } = steps[position];
+    const wasFocused = document.activeElement;
+    const animating = animate && view > 0 && supportsAnimation && !motion.matches && !!scene.animate;
+    demo.dataset.scene = String(number);
+    demo.dataset.view = String(view + 1);
+    demo.dataset.accent = scene.accent;
+    demo.style.setProperty("--scene-progress", `${number / scenes.length * 100}%`);
+    counter.textContent = `${number} / ${scenes.length}`;
+    counter.setAttribute("aria-label", `Slide ${number} of ${scenes.length}`);
+    title.textContent = heading;
+    note.textContent = guidance;
+    drawStage(animating);
+
+    previous.disabled = position === 0;
+    next.disabled = position === steps.length - 1;
+    if (wasFocused === previous && previous.disabled) next.focus({ preventScroll: true });
+    if (wasFocused === next && next.disabled) previous.focus({ preventScroll: true });
+
+    const part = scene.notes.length > 1 ? `, view ${view + 1} of ${scene.notes.length}` : "";
+    status.textContent = `Slide ${number} of ${scenes.length}${part}. ${heading}`;
+    if (animating) startTransition(scene, view);
+  }
+
+  function move(direction) {
+    if (direction > 0 && transition) {
+      settleTransition();
       return;
     }
+    const destination = position + direction;
+    if (destination < 0 || destination >= steps.length) return;
 
-    const shouldPause = state.playback === "running";
-    for (const animation of animations) {
-      if (shouldPause) animation.pause();
-      else animation.play();
-    }
-    state.playback = shouldPause ? "paused" : "running";
-    drawControls();
-    announce(shouldPause ? "Beat paused." : "Beat resumed.");
+    cancelTransition();
+    position = destination;
+    render(direction > 0);
+    window.scrollTo({ top: 0, behavior: "instant" });
   }
 
-  function showFinalState() {
-    cancelPlayback();
-    state.beat = currentScene().beats.length;
-    state.staticView = true;
-    drawScene();
-    announce("Showing the final state.");
-  }
-
-  function setReducedMotion(enabled) {
-    cancelPlayback();
-    state.reducedMotion = enabled;
-    drawScene();
-    announce(`Reduced motion ${enabled ? "on" : "off"}.`);
-  }
-
-  buttons.previous.addEventListener("click", () => goToScene(state.scene - 1));
-  buttons.next.addEventListener("click", () => goToScene(state.scene + 1));
-  buttons.continue.addEventListener("click", advanceBeat);
-  buttons.playback.addEventListener("click", togglePlayback);
-  buttons.replay.addEventListener("click", () => goToScene(state.scene, false));
-  buttons.final.addEventListener("click", showFinalState);
-  buttons.reset.addEventListener("click", () => {
-    state.showNotes = false;
-    goToScene(0);
-  });
-  buttons.motion.addEventListener("click", () => {
-    motionOverridden = true;
-    setReducedMotion(!state.reducedMotion);
-  });
-  buttons.notes.addEventListener("click", () => {
-    state.showNotes = !state.showNotes;
-    drawNotes();
-  });
-  motionPreference.addEventListener("change", ({ matches }) => {
-    if (!motionOverridden) setReducedMotion(matches);
-  });
+  previous.addEventListener("click", () => move(-1));
+  next.addEventListener("click", () => move(1));
 
   document.addEventListener("keydown", (event) => {
-    const target = event.target;
-    if (event.defaultPrevented || event.repeat || event.metaKey || event.ctrlKey || event.altKey
-      || event.shiftKey || target.isContentEditable || target.closest?.("input, textarea, select")) return;
+    if (event.defaultPrevented || event.repeat || event.metaKey || event.ctrlKey
+      || event.altKey || event.shiftKey || event.target.isContentEditable
+      || event.target.closest?.("input, textarea, select")) return;
+    if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
 
-    if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
-      event.preventDefault();
-      const direction = event.key === "ArrowLeft" ? -1 : 1;
-      goToScene(state.scene + direction);
-    } else if (event.key.toLowerCase() === "r") {
-      event.preventDefault();
-      goToScene(state.scene, false);
-    }
+    event.preventDefault();
+    move(event.key === "ArrowLeft" ? -1 : 1);
   });
 
-  drawScene();
+  motion.addEventListener("change", () => {
+    if (transition) settleTransition();
+  });
+
+  render();
 })();

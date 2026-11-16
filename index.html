@@ -12,40 +12,29 @@
     <header class="scene-header">
       <div class="scene-meta">
         <p class="illustration-note">Synthetic teaching illustration. Not a live assistant response.</p>
-        <div class="scene-progress">
+        <p class="scene-progress">
           <span class="scene-progress-track" aria-hidden="true"></span>
           <span id="scene-index" aria-label="Scene 1 of 7">1 / 7</span>
-        </div>
+        </p>
       </div>
       <h1 id="scene-title" tabindex="-1">Design before use.</h1>
+      <p id="slide-note" class="slide-note"></p>
     </header>
 
-    <section id="stage" class="stage" aria-label="Teaching illustration">
+    <section id="stage" class="stage" aria-labelledby="scene-title">
       <noscript>JavaScript is required to view the seven-scene teaching illustration.</noscript>
     </section>
 
-    <footer class="presenter">
-      <p id="takeaway" class="takeaway"></p>
-      <div class="controls" aria-label="Presenter controls" role="group">
-        <div class="scene-controls">
-          <button id="previous" type="button" disabled>Previous</button>
-          <button id="continue" class="primary-control" type="button">Continue</button>
-          <button id="play-pause" type="button" disabled>Play</button>
-          <button id="next" type="button">Next scene</button>
-        </div>
-        <div class="playback-controls">
-          <button id="replay" type="button">Replay scene</button>
-          <button id="final-state" type="button">Show final state</button>
-          <button id="reset" type="button">Reset demo</button>
-          <button id="motion-toggle" type="button" aria-pressed="false">Reduced motion</button>
-          <button id="notes-toggle" type="button" aria-expanded="false" aria-controls="notes">Speaker notes</button>
-        </div>
+    <nav class="slide-controls" aria-label="Slide navigation">
+      <div class="slide-controls-inner">
+        <button id="previous" type="button" disabled>
+          <span class="nav-arrow" aria-hidden="true">←</span> Previous
+        </button>
+        <button id="next" type="button">
+          Next <span class="nav-arrow" aria-hidden="true">→</span>
+        </button>
       </div>
-      <section id="notes" class="speaker-notes" aria-labelledby="notes-heading" hidden>
-        <h2 id="notes-heading">Speaker notes</h2>
-        <div id="notes-body"></div>
-      </section>
-    </footer>
+    </nav>
     <p id="status" class="sr-only" role="status" aria-atomic="true"></p>
   </main>
 </body>

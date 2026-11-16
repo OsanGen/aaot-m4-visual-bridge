@@ -51,7 +51,7 @@ body {
 
 #demo {
   --accent: var(--surface);
-  --scene-progress: 9.0909%;
+  --scene-progress: 8.3333%;
   max-inline-size: var(--deck-width);
   min-block-size: 100svh;
   margin-inline: auto;
@@ -736,67 +736,6 @@ body {
   --late-art-height: 40px;
 }
 
-.late-authority {
-  position: relative;
-  margin-block-start: 17px;
-  padding: 10px 14px;
-  border: 1px solid var(--line);
-  border-inline-start: 4px solid #d7a6bf;
-  border-radius: 9px;
-  background: color-mix(in srgb, var(--pink) 26%, white);
-}
-
-.late-system-revealed .late-input-request::after {
-  content: "";
-  position: absolute;
-  inset: auto auto -18px 21px;
-  inline-size: 2px;
-  block-size: 17px;
-  background: var(--late-connector);
-}
-
-.late-authority h2 {
-  margin-block-end: 6px;
-  font-size: .91em;
-}
-
-.late-checks {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.late-checks li {
-  display: grid;
-  align-content: start;
-  gap: 2px;
-  min-inline-size: 0;
-  font-size: var(--late-small);
-}
-
-.late-checks li + li {
-  border-inline-start: 1px solid #debccc;
-  margin-inline-start: 10px;
-  padding-inline-start: 13px;
-}
-
-.late-checks span {
-  color: var(--muted);
-}
-
-.late-boundary-caption {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px 18px;
-  margin-block-start: 8px;
-  padding-block-start: 7px;
-  border-block-start: 1px solid #debccc;
-  color: var(--muted);
-  font-size: var(--late-small);
-}
-
 .late-evidence {
   display: grid;
   gap: clamp(11px, 1.45vw, 19px);
@@ -1120,36 +1059,6 @@ body {
     padding: 0 0 0 6px;
     border-block-start: 0;
     border-inline-start: 1px solid var(--line);
-  }
-
-  .late-system-revealed .late-input-request::after {
-    display: none;
-  }
-
-  .late-authority {
-    margin-block-start: 10px;
-    padding: 8px 9px;
-  }
-
-  .late-checks {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .late-checks li {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 2px 7px;
-  }
-
-  .late-checks li + li {
-    margin: 0;
-    padding: 4px 0 0;
-    border: 0;
-  }
-
-  .late-boundary-caption {
-    margin-block-start: 6px;
-    padding-block-start: 6px;
   }
 
   .late-start-grid {
@@ -1996,4 +1905,95 @@ body {
     border-block-end: 2px solid currentColor;
     transform: translateX(-50%) rotate(45deg);
   }
+}
+
+@media (min-width: 901px) {
+  .late-system .late-workflow {
+    --late-node-gap: clamp(10px, 1.15vw, 17px);
+  }
+
+  .late-system .late-input {
+    min-block-size: clamp(76px, 10.8vh, 101px);
+  }
+
+  .late-system .late-review-output {
+    padding: 13px clamp(12px, 1.25vw, 19px);
+  }
+}
+
+.late-assistant-checks {
+  color: var(--ink);
+  font-size: clamp(16px, 1.5vw, 21px);
+  line-height: 1.35;
+}
+
+.late-assistant-check-list {
+  display: grid;
+  gap: clamp(8px, 1.15vw, 16px);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.late-assistant-check {
+  display: grid;
+  grid-template-columns: clamp(38px, 5.2vw, 76px) minmax(0, 1fr);
+  align-items: start;
+  gap: clamp(10px, 1.65vw, 23px);
+  padding: clamp(12px, 1.4vw, 21px);
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  background: var(--surface);
+}
+
+.late-assistant-check-art {
+  --late-art-width: clamp(38px, 5.2vw, 76px);
+  --late-art-height: clamp(36px, 4.4vw, 63px);
+}
+
+.late-assistant-check-copy {
+  display: grid;
+  gap: 4px;
+}
+
+.late-assistant-check-copy h2 {
+  font-size: clamp(18px, 1.85vw, 27px);
+  line-height: 1.2;
+}
+
+.late-assistant-check-copy p {
+  margin: 0;
+}
+
+.late-assistant-check-copy .late-assistant-check-explanation {
+  max-inline-size: 90ch;
+  margin-block-start: 4px;
+  padding: 6px 10px;
+  border-inline-start: 3px solid var(--pink);
+  color: var(--muted);
+  font-size: .88em;
+}
+
+@media (max-width: 595px) and (max-height: 680px) {
+  .late-system .late-inputs {
+    grid-template-rows: auto;
+    --late-node-gap: 4px;
+  }
+
+  .late-system .late-input {
+    min-block-size: 52px;
+    padding-block: 5px;
+  }
+
+  .late-system :is(.late-reference, .late-relationship) {
+    display: inline;
+  }
+
+  .late-system .late-reference + .late-relationship::before {
+    content: " · ";
+  }
+
+  .late-system .late-draft { min-block-size: 110px; }
+
+  .late-system :is(.late-merge, .late-workflow-arrow) { block-size: 16px; }
 }

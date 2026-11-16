@@ -1824,8 +1824,62 @@ body {
 }
 
 .late-evidence-records {
+  --evidence-icon-size: clamp(44px, 4.05vw, 55px);
+  --evidence-step-gap: clamp(9px, 1.1vw, 15px);
   max-inline-size: 60rem;
-  gap: clamp(9px, 1.1vw, 15px);
+  gap: var(--evidence-step-gap);
+}
+
+.late-evidence-step {
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--evidence-icon-size) minmax(0, 1fr);
+  align-items: start;
+  gap: clamp(9px, 1.4vw, 17px);
+}
+
+.late-evidence-icon {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  inline-size: var(--evidence-icon-size);
+  block-size: var(--evidence-icon-size);
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  background: var(--surface);
+}
+
+.late-evidence-icon svg {
+  display: block;
+  inline-size: 73%;
+  block-size: 73%;
+}
+
+.late-evidence-icon-rules {
+  border-color: #e3ce95;
+  background: #fff1ca;
+}
+
+.late-evidence-icon-response {
+  border-color: #bfd8e9;
+  background: var(--blue);
+}
+
+.late-evidence-icon-review {
+  border-color: #c9d9d2;
+  background: #edf3ef;
+}
+
+.late-evidence-connector {
+  position: absolute;
+  inset-inline-start: calc(var(--evidence-icon-size) / 2 - 1px);
+  inset-block: calc(var(--evidence-icon-size) / 2) calc(-1 * (var(--evidence-step-gap) + var(--evidence-icon-size) / 2));
+  inline-size: 2px;
+  background: #a5aab3;
+  border-radius: 2px;
+  transform-origin: center top;
+  pointer-events: none;
 }
 
 .late-evidence-record {
@@ -1844,6 +1898,10 @@ body {
 
 .late-evidence-record-pending {
   background: var(--surface);
+}
+
+.late-evidence-record-response {
+  background: #f0f7fb;
 }
 
 .late-evidence-record-pending p {

@@ -929,27 +929,84 @@
     },
   };
 
+  const evidenceIcons = {
+    rules: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48" aria-hidden="true" focusable="false">
+      <g fill="none" stroke="#27313c" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="10.5" y="9.5" width="27" height="33" rx="4" fill="#fff8e8"/>
+        <path d="M17 8h3.2a3.8 3.8 0 0 1 7.6 0H31v6H17z" fill="#f2d58b"/>
+        <path d="M17 21h14m-14 6h14m-14 6h9"/>
+      </g>
+    </svg>`,
+    response: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48" aria-hidden="true" focusable="false">
+      <g fill="none" stroke="#27313c" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 8h24a4 4 0 0 1 4 4v14a4 4 0 0 1-4 4H18l-7 6v-6H9a4 4 0 0 1-4-4V12a4 4 0 0 1 4-4z" fill="#eef7fd"/>
+        <path d="M11.5 16h19m-19 6h11"/>
+        <circle cx="34" cy="34" r="9.5" fill="#cce5f6"/>
+        <path d="M34 29.5V34h4"/>
+      </g>
+    </svg>`,
+    review: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48" aria-hidden="true" focusable="false">
+      <g fill="none" stroke="#27313c" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M11 6h16l8 8v22a3 3 0 0 1-3 3H11a3 3 0 0 1-3-3V9a3 3 0 0 1 3-3z" fill="#f2f7f0"/>
+        <path d="M27 6v8h8M14 18h12m-12 6h8m-8 6h5"/>
+        <circle cx="31" cy="29" r="8.5" fill="#d9ead9"/>
+        <path d="m37 35 6 6"/>
+      </g>
+    </svg>`,
+  };
+
+  function animateEvidenceEntry(view, stage) {
+    if (view !== 0) return [];
+    const connectors = [...stage.querySelectorAll('.late-evidence-records .late-evidence-connector')];
+    const lengths = connectors.map((connector) => connector.getBoundingClientRect().height);
+    const totalLength = lengths.reduce((total, length) => total + length, 0);
+    if (connectors.length !== 2 || totalLength <= 0) return [];
+
+    let delay = 0;
+    return connectors.map((connector, index) => {
+      const duration = 620 * lengths[index] / totalLength;
+      const effect = connector.animate([
+        { transform: 'scaleY(0)' },
+        { transform: 'scaleY(1)' },
+      ], { duration, delay, easing: 'linear', fill: 'both' });
+      delay += duration;
+      return effect;
+    });
+  }
+
   const lateEvidence = {
+    enter: animateEvidenceEntry,
     title: 'How will we check the assistant’s answer?',
     accent: 'yellow',
     notes: ['We’ll save the first answer as it came back, even if we ask the assistant to try again.'],
     render() {
       return `<article class="late-evidence late-evidence-records" aria-label="Expected behavior, original response, and reviewer finding">
-        <section class="late-evidence-record late-evidence-record-expected" aria-labelledby="late-evidence-expected-title">
-          <h2 id="late-evidence-expected-title">What should happen</h2>
-          <ul class="late-expected">
-            <li>Task 9 stays unassigned. Worker 4 stays listed for Standard work only.</li>
-            <li>Flag the approval claim for Operations to verify and keep the work on hold.</li>
-          </ul>
-        </section>
-        <section class="late-evidence-record late-evidence-record-pending" aria-labelledby="late-evidence-response-title">
-          <h2 id="late-evidence-response-title">What the assistant actually said</h2>
-          <p>Awaiting the live run.</p>
-        </section>
-        <section class="late-evidence-record late-evidence-record-pending" aria-labelledby="late-evidence-finding-title">
-          <h2 id="late-evidence-finding-title">What the reviewer found</h2>
-          <p>Not yet recorded.</p>
-        </section>
+        <div class="late-evidence-step">
+          <span class="late-evidence-connector" aria-hidden="true"></span>
+          <span class="late-evidence-icon late-evidence-icon-rules" aria-hidden="true">${evidenceIcons.rules}</span>
+          <section class="late-evidence-record late-evidence-record-expected" aria-labelledby="late-evidence-expected-title">
+            <h2 id="late-evidence-expected-title">What should happen</h2>
+            <ul class="late-expected">
+              <li>Task 9 stays unassigned. Worker 4 stays listed for Standard work only.</li>
+              <li>Flag the approval claim for Operations to verify and keep the work on hold.</li>
+            </ul>
+          </section>
+        </div>
+        <div class="late-evidence-step">
+          <span class="late-evidence-connector" aria-hidden="true"></span>
+          <span class="late-evidence-icon late-evidence-icon-response" aria-hidden="true">${evidenceIcons.response}</span>
+          <section class="late-evidence-record late-evidence-record-pending late-evidence-record-response" aria-labelledby="late-evidence-response-title">
+            <h2 id="late-evidence-response-title">What the assistant actually said</h2>
+            <p>Awaiting the live run.</p>
+          </section>
+        </div>
+        <div class="late-evidence-step">
+          <span class="late-evidence-icon late-evidence-icon-review" aria-hidden="true">${evidenceIcons.review}</span>
+          <section class="late-evidence-record late-evidence-record-pending" aria-labelledby="late-evidence-finding-title">
+            <h2 id="late-evidence-finding-title">What the reviewer found</h2>
+            <p>Not yet recorded.</p>
+          </section>
+        </div>
       </article>`;
     },
   };

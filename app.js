@@ -1094,10 +1094,12 @@
     },
   };
 
-  const lateHandoffPhases = [
-    ["Part 1 · Plan the assistant’s setup", ["Define the job", "Write rules", "Prepare files", "Check setup"]],
-    ["Part 2 · Try it on the case", ["Confirm setup", "Draft assignments", "Review the ticket", "Check evidence", "Recommend"]],
-  ];
+  function renderLatePhase(name, steps) {
+    return `<section class="late-phase">
+      <h2>${name}</h2>
+      <ol aria-label="${name} steps">${steps.map((step) => `<li>${step}</li>`).join("")}</ol>
+    </section>`;
+  }
 
   function renderLateHandoff() {
     return `<article class="late-handoff">
@@ -1117,19 +1119,19 @@
           </div>
         </div>
       </section>
-      <div class="late-run-map">
-        ${lateHandoffPhases.map(([name, steps]) => `
-          <section class="late-phase">
-            <h2>${name}</h2>
-            <ol aria-label="${name} steps">${steps.map((step) => `<li>${step}</li>`).join("")}</ol>
-          </section>`).join("")}
-      </div>
+      ${renderLatePhase("Part 1 · Plan the assistant’s setup", ["Define the job", "Write rules", "Prepare files", "Check setup"])}
+    </article>`;
+  }
+
+  function renderLatePartTwo() {
+    return `<article class="late-handoff">
+      ${renderLatePhase("Part 2 · Try it on the case", ["Confirm setup", "Draft assignments", "Review the ticket", "Check evidence", "Recommend"])}
       <section class="late-watch" aria-labelledby="late-watch-title">
-        <h2 id="late-watch-title">What to look for in Part 2</h2>
+        <h2 id="late-watch-title">Outputs to look for</h2>
         <dl class="late-watch-outputs">
-          <div><dt>Proposed assignments</dt><dd><code>ALLOCATION_CANDIDATE</code></dd></div>
-          <div><dt>Review of the ticket</dt><dd><code>CHANGE_REVIEW</code></dd></div>
-          <div><dt>Review record</dt><dd><code>A5</code></dd></div>
+          <div><dt>${lateSticker("A011", "late-file-art")}Proposed assignments</dt><dd><code>ALLOCATION_CANDIDATE</code></dd></div>
+          <div><dt>${lateSticker("A010", "late-file-art")}Review of the ticket</dt><dd><code>CHANGE_REVIEW</code></dd></div>
+          <div><dt>${lateSticker("A012", "late-file-art")}Review record</dt><dd><code>A5</code></dd></div>
         </dl>
       </section>
     </article>`;
@@ -1154,6 +1156,12 @@
       accent: "mint",
       notes: ["That was a preview of the checks in Part 2. We’ll start with Part 1 by setting the assistant’s job and rules."],
       render: renderLateHandoff,
+    },
+    {
+      title: "What to watch for in Part 2",
+      accent: "mint",
+      notes: [""],
+      render: renderLatePartTwo,
     },
   ];
 

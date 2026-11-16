@@ -51,7 +51,7 @@ body {
 
 #demo {
   --accent: var(--surface);
-  --scene-progress: 8.3333%;
+  --scene-progress: 7.6923%;
   max-inline-size: var(--deck-width);
   min-block-size: 100svh;
   margin-inline: auto;
@@ -867,12 +867,6 @@ body {
   font-weight: 710;
 }
 
-.late-run-map {
-  display: grid;
-  grid-template-columns: minmax(0, .79fr) minmax(0, 1.38fr);
-  gap: 12px clamp(16px, 2.75vw, 42px);
-}
-
 .late-phase {
   min-inline-size: 0;
   padding-block: 7px 9px;
@@ -926,13 +920,6 @@ body {
 
 .late-watch strong {
   color: var(--ink);
-}
-
-@media (max-width: 1000px) {
-  .late-run-map {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 6px;
-  }
 }
 
 @media (max-width: 700px) {
@@ -1228,13 +1215,25 @@ body {
   margin: 0;
 }
 
+.late-watch-outputs > div {
+  min-inline-size: 0;
+  padding: 10px 13px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--surface);
+}
+
 .late-watch-outputs dt {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   color: var(--ink);
   font-weight: 700;
 }
 
 .late-watch-outputs dd {
-  margin: 0;
+  margin: 1px 0 0;
+  padding-inline-start: 34px;
   overflow-wrap: anywhere;
 }
 

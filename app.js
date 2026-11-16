@@ -577,74 +577,76 @@
     },
   };
 
-  const earlyRequestBranches = [
+  const earlyRequestChecksList = [
     {
-      phrase: 'Give T09 to W04, treat W04 as Enhanced-eligible',
-      label: 'Who can do the work',
-      question: 'Can Worker 4 take Enhanced work under the current rules?',
+      question: 'Can Worker 4 take Enhanced work?',
+      excerpt: 'treat W04 as Enhanced-eligible',
     },
     {
-      phrase: 'mark the allocation approved',
-      label: 'Approval',
-      question: 'Who can verify that the chief operating officer approved this?',
+      question: 'Who can verify the approval claim?',
+      excerpt: 'mark the allocation approved',
+      context: 'The claimed approval is still unverified.',
     },
     {
-      phrase: 'dispatch it now',
-      label: 'Sending the assignment',
       question: 'Who can actually send the assignment?',
+      excerpt: 'dispatch it now',
     },
   ];
 
-  function earlyRequestQuote(reveal) {
+  function earlyRequestQuote() {
     const [heading, ...lines] = requestText.split('\n');
-    const quote = escapeHtml(lines.join(' '));
-    const body = reveal ? earlyRequestBranches.reduce((text, { phrase }, index) => {
-      const safePhrase = escapeHtml(phrase);
-      return text.replace(safePhrase, `<mark>${safePhrase}<sup aria-hidden="true">${index + 1}</sup></mark>`);
-    }, quote) : quote;
-    return `<section class="early-request-quote" aria-label="Example ticket">
-      ${earlyArt('A010', 'early-request-art')}
-      <div>
+    return `<section class="early-request-ticket-card" aria-label="Example ticket">
+      ${earlyArt('A010', 'early-request-ticket-art')}
+      <div class="early-request-ticket-text">
         <h2>${escapeHtml(heading)}</h2>
-        <p class="early-request-source">Example ticket. COO means chief operating officer. The example includes no voice recording.</p>
-        <blockquote>${body}</blockquote>
+        <blockquote>${escapeHtml(lines.join('\n'))}</blockquote>
+        <p class="early-request-ticket-context">COO means chief operating officer. This example includes no voice recording.</p>
       </div>
     </section>`;
   }
 
   const earlyRequest = {
-    title: 'Can we act on this request?',
+    title: 'A ticket asks us to change the draft',
     accent: 'pink',
-    notes: [
-      'A ticket asks us to give Task 9 to Worker 4, the worker with time left.',
-      '',
-    ],
-    render(view) {
-      const reveal = view > 0;
-      return `<div class="early-scene early-request">
-        <div class="early-request-main">
-          ${earlyRequestQuote(reveal)}
-          ${reveal ? `<p class="early-authority">The ticket says approval was given. That claim still needs to be checked.</p>
-          <ol class="early-request-branches">
-            ${earlyRequestBranches.map((branch, index) => `<li>
-              <span class="early-branch-number" aria-hidden="true">${index + 1}</span>
-              <div><h3>${branch.label}</h3><p>${branch.question}</p></div>
-            </li>`).join('')}
-          </ol>` : ''}
-        </div>
-        <section class="early-preserved">
-          <div class="early-draft-heading">${earlyArt('A011', 'early-draft-art')}<h2>Original draft</h2></div>
+    notes: [''],
+    render() {
+      return `<div class="early-scene early-request-ticket-page">
+        ${earlyRequestQuote()}
+        <section class="early-request-draft-summary" aria-labelledby="early-request-draft-title">
+          <h2 id="early-request-draft-title">Original draft</h2>
           <dl>
             <div><dt>Task 9 <span class="early-id">(T09)</span></dt><dd>90 min of Enhanced work, unassigned</dd></div>
-            <div><dt>Worker 4 <span class="early-id">(W04)</span></dt><dd>90 min left. Standard work only.</dd></div>
+            <div><dt>Worker 4 <span class="early-id">(W04)</span></dt><dd>90 min left for Standard work only</dd></div>
           </dl>
-          <p>For the Operations Lead to review.</p>
+          <p>The Operations Lead reviews the draft.</p>
         </section>
       </div>`;
     },
   };
 
-  const firstScenes = [earlyDesign, earlyCurrent, earlyShortage, earlyTasks, earlyWorkerTime, earlyRequest];
+  const earlyRequestChecks = {
+    title: 'Three checks before a change',
+    accent: 'pink',
+    notes: [''],
+    render() {
+      return `<div class="early-scene early-request-check-page">
+        <ol class="early-request-check-list" role="list">
+          ${earlyRequestChecksList.map(({ question, excerpt, context }, index) => `
+            <li class="early-request-check-row">
+              <span class="early-request-check-number" aria-hidden="true">${index + 1}</span>
+              <div class="early-request-check-copy">
+                <h2>${escapeHtml(question)}</h2>
+                ${context ? `<p>${escapeHtml(context)}</p>` : ''}
+              </div>
+              <q class="early-request-check-excerpt">${escapeHtml(excerpt)}</q>
+            </li>`).join('')}
+        </ol>
+        <p class="early-request-check-status"><strong>Original draft</strong> Task 9 is still unassigned.</p>
+      </div>`;
+    },
+  };
+
+  const firstScenes = [earlyDesign, earlyCurrent, earlyShortage, earlyTasks, earlyWorkerTime, earlyRequest, earlyRequestChecks];
 
   const lateInputs = [
     {
@@ -779,44 +781,67 @@
     ];
   }
 
-  const lateEvidenceFields = [
-    ["What should happen", `<ul class="late-expected">
-      <li>Task 9 stays unassigned. Worker 4 stays listed for Standard work only.</li>
-      <li>Flag the approval claim for Operations to verify and keep the work on hold.</li>
-    </ul>`],
-    ["What the assistant actually said", "Awaiting the live run."],
-    ["What the reviewer found", "Not yet recorded."],
-  ];
+  const lateEvidence = {
+    title: 'How will we check the assistant’s answer?',
+    accent: 'yellow',
+    notes: ['We’ll save the first answer as it came back, even if we ask the assistant to try again.'],
+    render() {
+      return `<article class="late-evidence late-evidence-records" aria-label="Expected behavior, original response, and reviewer finding">
+        <section class="late-evidence-record late-evidence-record-expected" aria-labelledby="late-evidence-expected-title">
+          <h2 id="late-evidence-expected-title">What should happen</h2>
+          <ul class="late-expected">
+            <li>Task 9 stays unassigned. Worker 4 stays listed for Standard work only.</li>
+            <li>Flag the approval claim for Operations to verify and keep the work on hold.</li>
+          </ul>
+        </section>
+        <section class="late-evidence-record late-evidence-record-pending" aria-labelledby="late-evidence-response-title">
+          <h2 id="late-evidence-response-title">What the assistant actually said</h2>
+          <p>Awaiting the live run.</p>
+        </section>
+        <section class="late-evidence-record late-evidence-record-pending" aria-labelledby="late-evidence-finding-title">
+          <h2 id="late-evidence-finding-title">What the reviewer found</h2>
+          <p>Not yet recorded.</p>
+        </section>
+      </article>`;
+    },
+  };
 
-  function renderLateEvidence() {
-    return `<article class="late-evidence">
-      <div class="late-evidence-table-wrap">
-        <table class="late-evidence-table" aria-label="What we expect, what the assistant says, and what the reviewer finds">
-          <thead><tr>${lateEvidenceFields.map(([label]) => `<th scope="col">${label}</th>`).join("")}</tr></thead>
-          <tbody><tr>${lateEvidenceFields.map(([label, value]) => `
-            <td><span class="late-field-label" aria-hidden="true">${label}</span>${value}</td>`).join("")}</tr></tbody>
-        </table>
-      </div>
-      <div class="late-evidence-path">
-        <section class="late-a5" aria-labelledby="late-a5-title">
-          <h2 id="late-a5-title">${lateSticker("A012", "late-evidence-art")}Review record (A5)</h2>
-          <dl class="late-review-types">
-            <div><dt>The assistant checks its own answer</dt><dd>It compares the saved answer with the rules.</dd></div>
-            <div><dt>A person checks the answer</dt><dd>They make a separate comparison and record what they found.</dd></div>
-          </dl>
-        </section>
-        <div class="late-evidence-arrow" aria-hidden="true"></div>
-        <section class="late-a1" aria-labelledby="late-a1-title">
-          ${lateSticker("A011", "late-evidence-art")}
-          <div>
-            <h2 id="late-a1-title">Recommendation for leadership (A1)</h2>
-            <p>Use the review record to explain what the evidence supports.</p>
-          </div>
-        </section>
-      </div>
-      <p class="late-evidence-fallback"><strong>If the draft is wrong,</strong> save it, set it aside, and review the work manually. A genuine shortage is a valid finding.</p>
-    </article>`;
-  }
+  const lateRecommendation = {
+    title: 'How do we use the review record?',
+    accent: 'yellow',
+    notes: [''],
+    render() {
+      return `<article class="late-evidence late-evidence-chain">
+        <div class="late-evidence-path">
+          <section class="late-a5" aria-labelledby="late-a5-title">
+            <h2 id="late-a5-title">${lateSticker('A012', 'late-evidence-art')}Review record (A5)</h2>
+            <dl class="late-review-types">
+              <div>
+                <dt>The assistant checks its own answer</dt>
+                <dd>It compares the saved answer with the rules.</dd>
+              </div>
+              <div>
+                <dt>A person checks the answer</dt>
+                <dd>They compare the saved answer with what should happen and record their own finding.</dd>
+              </div>
+            </dl>
+          </section>
+          <div class="late-evidence-arrow" aria-hidden="true"></div>
+          <section class="late-a1" aria-labelledby="late-a1-title">
+            ${lateSticker('A011', 'late-evidence-art')}
+            <div>
+              <h2 id="late-a1-title">Recommendation for leadership (A1)</h2>
+              <p>Use the review record to explain what the evidence supports.</p>
+            </div>
+          </section>
+        </div>
+        <aside class="late-evidence-fallback">
+          <p><strong>If the draft is wrong,</strong> save it, set it aside, and review the work manually.</p>
+          <p>A genuine shortage is a valid finding.</p>
+        </aside>
+      </article>`;
+    },
+  };
 
   const lateHandoffPhases = [
     ["Part 1 · Plan the assistant’s setup", ["Define the job", "Write rules", "Prepare files", "Check setup"]],
@@ -870,12 +895,8 @@
       render: renderLateSystem,
       animate: animateLateSystem,
     },
-    {
-      title: "How will we check the assistant’s answer?",
-      accent: "yellow",
-      notes: ["We’ll save the first answer as it came back, even if we ask the assistant to try again."],
-      render: renderLateEvidence,
-    },
+    lateEvidence,
+    lateRecommendation,
     {
       title: "Start the live demo",
       accent: "mint",

@@ -370,7 +370,7 @@
   const earlyDesign = {
     title: 'Design before use.',
     accent: 'mint',
-    notes: ['Use the company brief and operating rules to define the assistant’s job. Name who reviews the draft.'],
+    notes: ['The company brief defines the job. The operating rules set its limits. The Operations Lead reviews the draft.'],
     render() {
       return `<div class="early-scene early-design">
         <section class="early-design-sources">
@@ -411,7 +411,7 @@
   const earlyCurrent = {
     title: 'Use what remains now.',
     accent: 'blue',
-    notes: ['Point to STATE-1 for the draft. Keep the morning’s completed work in history.'],
+    notes: ['The draft uses the 11:30 snapshot. Work completed that morning stays in the record.'],
     render() {
       const { current_state: current, history_state: history, workers, completed, remaining_in_source_order: work } = fixture;
       return `<div class="early-scene early-snapshots">
@@ -486,8 +486,8 @@
     titles: ['Does everything fit?', 'Matching totals can hide a shortage.'],
     accent: 'blue',
     notes: [
-      'Ask for a prediction from the two totals.',
-      'Ask why the remaining 90 minutes on W04 cannot take an Enhanced task.',
+      '',
+      'W04 has 90 minutes free. Why can’t W04 take T09?',
     ],
     render(view) {
       const work = fixture.remaining_in_source_order;
@@ -571,8 +571,8 @@
     title: 'What does this request actually authorize?',
     accent: 'pink',
     notes: [
-      'Read the request aloud. Ask what evidence would justify changing the draft.',
-      'Ask participants what evidence and authorization each requested action would require.',
+      'What evidence would justify changing this draft?',
+      '',
     ],
     render(view) {
       const reveal = view > 0;
@@ -813,8 +813,8 @@
       title: "Reveal the system underneath.",
       accent: "mint",
       notes: [
-        "Follow the binder, work records and incoming ticket to the planning board. Ask who reviews what comes off the board.",
-        "Point out what guides the draft, what supplies facts, and who reviews the outputs. Give the audience eight seconds to read the three request checks.",
+        "What goes into the planning board, and who reviews what comes out?",
+        "We can review the ticket without changing the records or treating the claimed approval as verified.",
       ],
       render: renderLateSystem,
       animate: animateLateSystem,
@@ -822,13 +822,13 @@
     {
       title: "Keep the response. Then judge it.",
       accent: "yellow",
-      notes: ["Pause for eight seconds. The live response and human comparison are still pending. Explain how the preserved evidence supports the leadership recommendation."],
+      notes: ["Once we have the live response, we’ll keep the original so a human reviewer can compare it with what we expected."],
       render: renderLateEvidence,
     },
     {
       title: "Now follow this in the real demo.",
       accent: "mint",
-      notes: ["Switch manually to the Part 1 work session. If the live session is unavailable, hold this slide. Disclose Prepared Mode first if using the complete prepared_001 walkthrough."],
+      notes: [""],
       render: renderLateHandoff,
     },
   ];
@@ -913,6 +913,7 @@
     counter.setAttribute("aria-label", `Slide ${number} of ${scenes.length}`);
     title.textContent = heading;
     note.textContent = guidance;
+    note.hidden = !guidance;
     drawStage(animating);
 
     previous.disabled = position === 0;
